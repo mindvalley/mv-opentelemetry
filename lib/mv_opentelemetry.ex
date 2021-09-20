@@ -27,6 +27,16 @@ defmodule MvOpentelemetry do
   ```
   """
 
+  @doc """
+  Registers an application tracer for your OTP application. Should be called only once
+  per application startup.
+  """
+  @spec register_application(atom()) :: :ok
+  def register_application(atom) do
+    true = :opentelemetry.register_application_tracer(atom)
+    :ok
+  end
+
   defmodule Error do
     defexception [:message, :module]
   end
