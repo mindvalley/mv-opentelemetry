@@ -30,6 +30,9 @@ config :mv_opentelemetry_harness, MvOpentelemetryHarnessWeb.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
+  pubsub_server: MvOpentelemetryHarness.PubSub,
+  live_view: [signing_salt: "FqZ8F1CaCmC4SQIB"],
+  secret_key_base: "LEJ4oTouiIzWW2SKoMbF2YgCgDD4rMHOZh1CDXFGSsIU6QrHbNJN/qLF02krZ7GQ",
   check_origin: false,
   watchers: [
     node: [
@@ -37,7 +40,7 @@ config :mv_opentelemetry_harness, MvOpentelemetryHarnessWeb.Endpoint,
       "--mode",
       "development",
       "--watch-stdin",
-      cd: Path.expand("../assets", __DIR__)
+      cd: Path.expand("../mv_opentelemetry_harness/assets", __DIR__)
     ]
   ]
 

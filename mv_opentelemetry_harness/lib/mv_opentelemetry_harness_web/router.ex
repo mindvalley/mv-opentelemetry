@@ -9,13 +9,18 @@ defmodule MvOpentelemetryHarnessWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :telemetry do
+    plug Plug.Telemetry, event_prefix: [:harness, :request]
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
   scope "/", MvOpentelemetryHarnessWeb do
-    pipe_through :browser
+    pipe_through [:browser, :telemetry]
 
+    live "/live", LiveLive
     get "/", PageController, :index
   end
 

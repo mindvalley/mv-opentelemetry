@@ -7,6 +7,7 @@ config :mv_opentelemetry_harness,
 config :mv_opentelemetry_harness, MvOpentelemetryHarnessWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "yu69b2fyPQLDba6EWwyNe2xAXAkcAQT68owg8KhGL/Hfosl3QuYOffSE+eFvqeuX",
+  live_view: [signing_salt: "FqZ8F1CaCmC4SQIB"],
   render_errors: [
     view: MvOpentelemetryHarnessWeb.ErrorView,
     accepts: ~w(html json),
@@ -24,6 +25,8 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :opentelemetry, processors: [otel_batch_processor: %{scheduled_delay_ms: 1}]
 
 # Configure your database
 #
