@@ -68,7 +68,7 @@ defmodule MvOpentelemetry do
 
   ## Absinthe
     - `name_prefix` OPTIONAL telemetry prefix that will be emited in events, for example
-    [:my_app, :live_view]
+    [:my_app, :graphql]
     - `tracer_id` OPTIONAL atom to identify tracers in case you want to listen to events from
     live_view twice.
 
