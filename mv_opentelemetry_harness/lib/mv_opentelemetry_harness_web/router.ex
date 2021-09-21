@@ -17,6 +17,14 @@ defmodule MvOpentelemetryHarnessWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/" do
+    pipe_through :api
+    pipe_through :telemetry
+
+    forward "/graphql", Absinthe.Plug, schema: MvOpentelemetryHarnessWeb.Schema
+    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: MvOpentelemetryHarnessWeb.Schema
+  end
+
   scope "/", MvOpentelemetryHarnessWeb do
     pipe_through [:browser, :telemetry]
 
