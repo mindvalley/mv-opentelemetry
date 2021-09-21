@@ -27,7 +27,7 @@ defmodule MvOpentelemetry.AbsintheTest do
                  "pets" => [%{"name" => "Pinky"}, %{"name" => "Brain"}]
                }
              }
-    }
+           }
 
     assert_receive {:span, span_record}
     assert "absinthe.resolve.field" == span(span_record, :name)
