@@ -34,10 +34,10 @@ config :opentelemetry, processors: [otel_batch_processor: %{scheduled_delay_ms: 
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :mv_opentelemetry_harness, MvOpentelemetryHarness.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: System.get_env("POSTGRES_USER") || "postgres",
+  password: System.get_env("POSTGRES_ROOT_PASSWORD") || System.get_env("POSTGRES_PASSWORD") || "postgres",
   database: "mv_opentelemetry_harness_test#{System.get_env("MIX_TEST_PARTITION")}",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST") || "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
 # Print only warnings and errors during test
