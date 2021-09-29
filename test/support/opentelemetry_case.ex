@@ -1,4 +1,8 @@
 defmodule MvOpentelemetry.OpenTelemetryCase do
+  @moduledoc """
+  Basic opentelemetry test case.
+  """
+
   alias Ecto.Adapters.SQL.Sandbox
   alias MvOpentelemetryHarness.Repo
   use ExUnit.CaseTemplate

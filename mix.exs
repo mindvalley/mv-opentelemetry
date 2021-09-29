@@ -9,7 +9,13 @@ defmodule MvOpentelemetry.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      aliases: aliases(),
+      deps: deps(),
+      dialyzer: [
+        plt_add_apps: [:mix, :ex_unit],
+        ignore_warnings: ".known_dialyzer_warnings",
+        flags: [:underspecs]
+      ]
     ]
   end
 
@@ -38,9 +44,21 @@ defmodule MvOpentelemetry.MixProject do
       # Test and development harness
       {:mv_opentelemetry_harness, path: "./mv_opentelemetry_harness", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:floki, ">= 0.30.0", only: :test}
+      {:floki, ">= 0.30.0", only: :test},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+    ]
+  end
+
+  defp aliases do
+    [
+      test: [
+        "ecto.create --repo MvOpentelemetryHarness.Repo --quiet",
+        "ecto.migrate --repo MvOpentelemetryHarness.Repo --quiet",
+        "test"
+      ]
     ]
   end
 end

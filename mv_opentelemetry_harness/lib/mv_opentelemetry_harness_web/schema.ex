@@ -1,8 +1,6 @@
 defmodule MvOpentelemetryHarnessWeb.Schema do
   use Absinthe.Schema
 
-  alias MvStories.Stories
-
   # Example data
   @items %{
     "foo" => %{id: "foo", name: "Stephen"},
