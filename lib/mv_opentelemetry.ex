@@ -80,7 +80,7 @@ defmodule MvOpentelemetry do
     Plug.Telemetry twice.
   """
   @spec register_tracer(:absinthe | :ecto | :plug | :live_view, Access.t()) :: :ok
-  def register_tracer(:absinthe, opts), do: MvOpenTelemetry.Absinthe.register_tracer(opts)
+  def register_tracer(:absinthe, opts), do: MvOpentelemetry.Absinthe.register_tracer(opts)
   def register_tracer(:ecto, opts), do: MvOpentelemetry.Ecto.register_tracer(opts)
   def register_tracer(:plug, opts), do: MvOpentelemetry.Plug.register_tracer(opts)
   def register_tracer(:live_view, opts), do: MvOpentelemetry.LiveView.register_tracer(opts)
