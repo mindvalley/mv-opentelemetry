@@ -35,7 +35,8 @@ config :opentelemetry, processors: [otel_batch_processor: %{scheduled_delay_ms: 
 # Run `mix help test` for more information.
 config :mv_opentelemetry_harness, MvOpentelemetryHarness.Repo,
   username: System.get_env("POSTGRES_USER") || "postgres",
-  password: System.get_env("POSTGRES_ROOT_PASSWORD") || System.get_env("POSTGRES_PASSWORD") || "postgres",
+  password:
+    System.get_env("POSTGRES_ROOT_PASSWORD") || System.get_env("POSTGRES_PASSWORD") || "postgres",
   database: "mv_opentelemetry_harness_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: System.get_env("POSTGRES_HOST") || "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
