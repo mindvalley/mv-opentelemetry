@@ -15,12 +15,6 @@ pipeline {
         POSTGRES_PASSWORD = 'ubuntupassword'
         POSTGRES_HOST = "${APP_NAME}_postgreSQL_${NODE_NAME}_${BUILD_NUMBER}"
         POSTGRES_CLIENT = "${APP_NAME}_postgreSQLClient_${NODE_NAME}_${BUILD_NUMBER}"
-        MYSQL_USER = 'root'
-        MYSQL_PASSWORD = 'mysql'
-        MYSQL_ROOT_PASSWORD = 'mysql'
-        MYSQL_DATABASE = 'mv_stories_test'
-        MYSQL_HOST = "${APP_NAME}_mySQL_${NODE_NAME}_${BUILD_NUMBER}"
-        MYSQL_CLIENT = "${APP_NAME}_mySQLClient_${NODE_NAME}_${BUILD_NUMBER}"
         SIDECAR_NETWORK = "${APP_NAME}_sidecar_network_${BUILD_TAG}"
         CCI_CLIENT = "${APP_NAME}-cci-client_${NODE_NAME}_${BUILD_NUMBER}"
         CircleciContainerName = "${APP_NAME}-ci-test_${NODE_NAME}_${BUILD_NUMBER}"
@@ -83,9 +77,8 @@ pipeline {
                     docker network inspect $SIDECAR_NETWORK
                     '''
                     docker.image('postgres:12').withRun("--name ${POSTGRES_HOST} --network ${SIDECAR_NETWORK} -p 5432 -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD}") { db ->
-                        docker.image('mysql:5.7').withRun("--name ${MYSQL_HOST} --network ${SIDECAR_NETWORK} -p 3306 -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}") { legacy_db ->
-                            docker.image('postgres:12').inside("--network ${SIDECAR_NETWORK} --name ${POSTGRES_CLIENT}") {
-                                sh '''
+                        docker.image('postgres:12').inside("--network ${SIDECAR_NETWORK} --name ${POSTGRES_CLIENT}") {
+                            sh '''
                                 psql --version
                                 sleep 2
                                 until pg_isready -h ${POSTGRES_HOST}
@@ -94,10 +87,10 @@ pipeline {
                                   sleep 2;
                                 done
                                 '''
-                            }
+                        }
 
-                            docker.image('${CircleCiDockerImage}').inside("--name ${CCI_CLIENT} --network ${SIDECAR_NETWORK}") {
-                                sh '''
+                        docker.image('${CircleCiDockerImage}').inside("--name ${CCI_CLIENT} --network ${SIDECAR_NETWORK}") {
+                            sh '''
                                 sudo apt-get update
                                 sudo apt-get install -y postgresql-client
                                 mix local.hex --force
@@ -106,41 +99,40 @@ pipeline {
                                 cd -
                                 mix test
                                 '''
-                            }
                         }
                     }
                 }
             }
+        }
 
-            // always remove docker created network
-            post {
-                always {
-                    script {
-                        commit = sh(returnStdout: true, script: 'git rev-parse HEAD')
-                        author = sh(returnStdout: true, script: "git --no-pager show -s --format='%an' ${commit}").trim()
-                        message = sh(returnStdout: true, script: 'git log -1 --pretty=format:%s').trim()
-                        slack_commit_msg = "\n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Info: * ${env.BUILD_URL}\n*GitHub: * ${message} -> (`${commit.take(9)}` by ${author})"
-                        sh '''
+        // always remove docker created network
+        post {
+            always {
+                script {
+                    commit = sh(returnStdout: true, script: 'git rev-parse HEAD')
+                    author = sh(returnStdout: true, script: "git --no-pager show -s --format='%an' ${commit}").trim()
+                    message = sh(returnStdout: true, script: 'git log -1 --pretty=format:%s').trim()
+                    slack_commit_msg = "\n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Info: * ${env.BUILD_URL}\n*GitHub: * ${message} -> (`${commit.take(9)}` by ${author})"
+                    sh '''
                     docker network rm "${SIDECAR_NETWORK}"
                     '''
-                    }
-                }
-                success {
-                    slackSend (
-                        channel: env.SlackChannel,
-                        color: '#00FF00',
-                        message: "Hurray! CI tests *Success* ${slack_commit_msg}"
-                    )
-                }
-                failure {
-                    slackSend (
-                        channel: env.SlackChannel,
-                        color: '#FF0000',
-                        message: "Oops, something's wrong; CI *Failed* ${slack_commit_msg}"
-                    )
                 }
             }
-
+            success {
+                slackSend (
+                    channel: env.SlackChannel,
+                    color: '#00FF00',
+                    message: "Hurray! CI tests *Success* ${slack_commit_msg}"
+                )
+            }
+            failure {
+                slackSend (
+                    channel: env.SlackChannel,
+                    color: '#FF0000',
+                    message: "Oops, something's wrong; CI *Failed* ${slack_commit_msg}"
+                )
+            }
         }
+
     }
 }
