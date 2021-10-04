@@ -58,3 +58,4 @@ config :opentelemetry,
     }
   ]
 ```
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmindvalley%2Fmv-opentelemetry.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmindvalley%2Fmv-opentelemetry?ref=badge_large)
