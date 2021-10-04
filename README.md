@@ -29,6 +29,11 @@ def start(_type, _args) do
 end
 ```
 
+### Note about Absinthe tracers
+
+In case your application uses Absinthe to implement GraphQL and you return structs from your
+resolvers, ensure that each of the structs implements the Jason.Encoder protocol.
+
 ## Installation
 
 The package can be installed by adding `mv_opentelemetry` to your list of

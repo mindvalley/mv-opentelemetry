@@ -30,8 +30,6 @@ defmodule MvOpentelemetry.OpenTelemetryCase do
       Sandbox.mode(Repo, {:shared, self()})
     end
 
-    conn = Phoenix.ConnTest.build_conn()
-
-    {:ok, conn: conn}
+    {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

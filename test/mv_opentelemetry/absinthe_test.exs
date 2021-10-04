@@ -50,4 +50,50 @@ defmodule MvOpentelemetry.AbsintheTest do
     :ok =
       :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe, :handle_start_event})
   end
+
+  test "sends error data to pid", %{conn: conn} do
+    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
+    MvOpentelemetry.Absinthe.register_tracer(tracer_id: :test_absinthe_error_tracer)
+
+    # Here be error
+    query = """
+    query{
+      human(id: 1.22){
+        name
+        id,
+        pets{
+          name
+        }
+      }
+    }
+    """
+
+    conn = post(conn, "/graphql", %{"query" => query})
+
+    assert json_response(conn, 200) == %{
+             "errors" => [
+               %{
+                 "locations" => [%{"column" => 9, "line" => 2}],
+                 "message" => "Argument \"id\" has invalid value 1.22."
+               }
+             ]
+           }
+
+    assert_receive {:span, span_record}
+    assert "absinthe.execute.operation" == span(span_record, :name)
+    attributes = span(span_record, :attributes)
+
+    assert {:"graphql.operation.input", query} in attributes
+    assert {:"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
+
+    :ok =
+      :telemetry.detach(
+        {:test_absinthe_error_tracer, MvOpentelemetry.Absinthe, :handle_stop_event}
+      )
+
+    :ok =
+      :telemetry.detach(
+        {:test_absinthe_error_tracer, MvOpentelemetry.Absinthe, :handle_start_event}
+      )
+  end
 end

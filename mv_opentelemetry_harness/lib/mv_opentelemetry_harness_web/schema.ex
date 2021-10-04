@@ -1,10 +1,13 @@
 defmodule MvOpentelemetryHarnessWeb.Schema do
   use Absinthe.Schema
 
+  alias MvOpentelemetryHarness.Pet
+  alias MvOpentelemetryHarness.Human
+
   # Example data
   @items %{
-    "foo" => %{id: "foo", name: "Stephen"},
-    "bar" => %{id: "bar", name: "Bar"}
+    "foo" => %Human{id: "foo", name: "Stephen"},
+    "bar" => %Human{id: "bar", name: "Bar"}
   }
 
   object :pet do
@@ -25,7 +28,7 @@ defmodule MvOpentelemetryHarnessWeb.Schema do
   end
 
   def pet_resolver(_map, _opts) do
-    {:ok, [%{name: "Pinky"}, %{name: "Brain"}]}
+    {:ok, [%Pet{name: "Pinky"}, %Pet{name: "Brain"}]}
   end
 
   query do

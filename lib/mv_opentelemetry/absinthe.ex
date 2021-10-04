@@ -7,9 +7,10 @@ defmodule MvOpentelemetry.Absinthe do
   @tracer_id __MODULE__
   @tracer_version "0.1.0"
 
+  @absinthe_events [[:absinthe, :execute, :operation], [:absinthe, :resolve, :field]]
+
   def register_tracer(opts) do
     opts = handle_opts(opts)
-    prefix = opts[:span_prefix]
     tracer_id = opts[:tracer_id]
     tracer_version = opts[:tracer_version]
     :opentelemetry.register_tracer(tracer_id, tracer_version)
@@ -17,7 +18,7 @@ defmodule MvOpentelemetry.Absinthe do
     :ok =
       :telemetry.attach_many(
         {tracer_id, __MODULE__, :handle_start_event},
-        Enum.map(prefix, fn x -> x ++ [:start] end),
+        Enum.map(@absinthe_events, fn x -> x ++ [:start] end),
         &__MODULE__.handle_start_event/4,
         opts
       )
@@ -25,16 +26,14 @@ defmodule MvOpentelemetry.Absinthe do
     :ok =
       :telemetry.attach_many(
         {tracer_id, __MODULE__, :handle_stop_event},
-        Enum.map(prefix, fn x -> x ++ [:stop] end),
+        Enum.map(@absinthe_events, fn x -> x ++ [:stop] end),
         &__MODULE__.handle_stop_event/4,
         opts
       )
   end
 
   defp handle_opts(opts) do
-    span_prefix =
-      opts[:span_prefix] || [[:absinthe, :execute, :operation], [:absinthe, :resolve, :field]]
-
+    span_prefix = [:absinthe]
     name_prefix = opts[:name_prefix] || span_prefix
     tracer_id = opts[:tracer_id] || @tracer_id
     tracer_version = opts[:tracer_version] || @tracer_version
@@ -47,8 +46,8 @@ defmodule MvOpentelemetry.Absinthe do
     ]
   end
 
-  def handle_start_event([:absinthe, :resolve, :field, :start], _measurements, meta, _opts) do
-    event_name = Enum.join([:absinthe, :resolve, :field], ".")
+  def handle_start_event([:absinthe, :resolve, :field, :start], _measurements, meta, opts) do
+    event_name = Enum.join(opts[:name_prefix] ++ [:resolve, :field], ".")
 
     resolution = meta.resolution
 
@@ -62,8 +61,8 @@ defmodule MvOpentelemetry.Absinthe do
     |> Span.set_attributes(attributes)
   end
 
-  def handle_start_event([:absinthe, :execute, :operation, :start], _measurements, meta, _opts) do
-    event_name = Enum.join([:absinthe, :execute, :operation], ".")
+  def handle_start_event([:absinthe, :execute, :operation, :start], _measurements, meta, opts) do
+    event_name = Enum.join(opts[:name_prefix] ++ [:execute, :operation], ".")
 
     attributes = [
       "graphql.operation.input": meta.blueprint.input
@@ -79,9 +78,11 @@ defmodule MvOpentelemetry.Absinthe do
     resolution = meta.resolution
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(@tracer_id, meta)
 
+    value = Jason.encode!(resolution.value)
+
     attributes = [
       "graphql.field.state": resolution.state,
-      "graphql.field.value": Jason.encode!(resolution.value)
+      "graphql.field.value": value
     ]
 
     Span.set_attributes(ctx, attributes)
@@ -92,9 +93,11 @@ defmodule MvOpentelemetry.Absinthe do
   def handle_stop_event([:absinthe, :execute, :operation, :stop], _measurements, meta, _opts) do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(@tracer_id, meta)
 
+    value = Jason.encode!(meta.blueprint.result)
+
     attributes = [
       "graphql.operation.schema": meta.blueprint.schema,
-      "graphql.operation.result": Jason.encode!(meta.blueprint.result)
+      "graphql.operation.result": value
     ]
 
     Span.set_attributes(ctx, attributes)
