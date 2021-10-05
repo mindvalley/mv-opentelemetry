@@ -41,9 +41,6 @@ defmodule MvOpentelemetry.MixProject do
       {:opentelemetry_api, "~> 0.6.0", override: true},
       {:opentelemetry_telemetry, "~> 1.0.0-beta.2"},
 
-      # JSON
-      {:jason, "~> 1.0"},
-
       # Test and development harness
       {:mv_opentelemetry_harness, path: "./mv_opentelemetry_harness", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
