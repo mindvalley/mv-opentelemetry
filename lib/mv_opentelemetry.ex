@@ -12,18 +12,23 @@ defmodule MvOpentelemetry do
   # Somewhere in your application startup, for example in Application.start/2:
 
   def start(_type, _args) do
-    :ok = MvOpentelemetry.register_application(:mv_platform)
-    :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:mv_platform, :repo])
+    :ok = MvOpentelemetry.register_application(:my_app)
+    :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :repo])
 
     :ok =
       MvOpentelemetry.register_tracer(:ecto,
-        span_prefix: [:mv_platform, :replica_repo],
+        span_prefix: [:my_app, :replica_repo],
         tracer_id: :replica
       )
 
     :ok = MvOpentelemetry.register_tracer(:plug)
     :ok = MvOpentelemetry.register_tracer(:live_view)
   end
+
+  ## Note about Absinthe tracers
+
+  In case your application uses Absinthe to implement GraphQL and you return structs from your
+  resolvers, ensure that each of the structs implements the MvOpentelemetry.Sanitizer protocol.
   ```
   """
 
@@ -37,14 +42,31 @@ defmodule MvOpentelemetry do
     :ok
   end
 
+  @doc """
+  Convert a data structure into another one, that is safe to store in a tracing backend
+  and can be converted to JSON.
+
+  You can use this function to implement your own tracers. It is also used to sanitize
+  absinthe data.
+  """
+  @spec sanitize(MvOpentelemetry.Sanitizer.t()) :: {:error, Exception.t()} | term()
+  def sanitize(value), do: MvOpentelemetry.Sanitize.sanitize!(value)
+
+  @doc """
+  Same as sanitize/1, but raises on error.
+  """
+  @spec sanitize!(MvOpentelemetry.Sanitizer.t()) :: term()
+  def sanitize!(value), do: MvOpentelemetry.Sanitize.sanitize!(value)
+
   defmodule Error do
     defexception [:message, :module]
   end
 
   @doc """
-  Registers tracer for given functional area. Allowed areas are: :ecto, :phoenix and :live_view
+  Registers tracer for given functional area. Allowed areas are: :ecto, :plug, :absinthe
+  and :live_view
   """
-  @spec register_tracer(:ecto | :phoenix | :live_view) :: :ok
+  @spec register_tracer(:ecto | :plug | :live_view | :absinthe) :: :ok
   def register_tracer(atom), do: register_tracer(atom, [])
 
   @doc """
@@ -67,10 +89,8 @@ defmodule MvOpentelemetry do
     live_view twice.
 
   ## Absinthe
-    - `name_prefix` OPTIONAL telemetry prefix that will be emited in events, for example
-    [:my_app, :graphql]
-    - `tracer_id` OPTIONAL atom to identify tracers in case you want to listen to events from
-    Absinthe twice.
+    - `name_prefix` OPTIONAL telemetry prefix that will be emited in events, defaults to
+    [:absinthe]
 
   ## Plug
     - `span_prefix` OPTIONAL telemetry prefix to listen to. Defaults to [:phoenix, :endpoint]

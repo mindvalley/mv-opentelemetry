@@ -29,6 +29,43 @@ def start(_type, _args) do
 end
 ```
 
+### Data Sanitization - MvOpentelemetry.Sanitizer
+
+The library contains a protocol to sanitize telemetry data to remove sensitive information
+and transform it to format that can be encoded to JSON. After being passed through
+this protocol, data should have the following characteristics:
+
+  * it is safe to store in tracing software, does not contain sensitive
+    or personally identifiable data.
+  * it can be later converted to JSON, which is standard storage format for
+    most tracing data. Structs become bare maps.
+
+You are required to use it when you send custom structs to your tracing software.
+
+##### Using the `@derive` annotation
+
+The notations below are equivalent. You can also skip the options completely.
+
+```elixir
+defmodule MyApp.User do
+  @derive {MvOpentelemetry.Sanitizer, [only: [:id, :email]]}
+  @derive {MvOpentelemetry.Sanitizer, [except: [:password]]}
+  defstruct [:id, :email, :password]
+end
+```
+
+#### Implementing the protocol directly
+
+If you want to perform more complex transformations, implement the sanitize function directly.
+
+```elixir
+defimpl MvOpentelemetry.Sanitizer, for: MyApp.User do
+  def sanitize(user, _opts) do
+    %{id: user.id, email: Base.encode64(user.email)}
+  end
+end
+```
+
 ## Installation
 
 The package can be installed by adding `mv_opentelemetry` to your list of
