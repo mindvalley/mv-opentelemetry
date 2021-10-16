@@ -1,52 +1,19 @@
 defmodule MvOpentelemetry.Absinthe do
   @moduledoc false
 
-  require OpenTelemetry.Tracer
-  alias OpenTelemetry.Span
-
-  @tracer_id __MODULE__
-
-  @absinthe_events [[:absinthe, :execute, :operation], [:absinthe, :resolve, :field]]
-
-  def register_tracer(opts) do
-    opts = handle_opts(opts)
-    tracer_id = opts[:tracer_id]
-    tracer_version = opts[:tracer_version]
-    :opentelemetry.register_tracer(tracer_id, tracer_version)
-
-    :ok =
-      :telemetry.attach_many(
-        {tracer_id, __MODULE__, :handle_start_event},
-        Enum.map(@absinthe_events, fn x -> x ++ [:start] end),
-        &__MODULE__.handle_start_event/4,
-        opts
-      )
-
-    :ok =
-      :telemetry.attach_many(
-        {tracer_id, __MODULE__, :handle_stop_event},
-        Enum.map(@absinthe_events, fn x -> x ++ [:stop] end),
-        &__MODULE__.handle_stop_event/4,
-        opts
-      )
-  end
-
-  defp handle_opts(opts) do
-    span_prefix = [:absinthe]
-    name_prefix = opts[:name_prefix] || span_prefix
-    tracer_id = opts[:tracer_id] || @tracer_id
-    tracer_version = opts[:tracer_version] || MvOpentelemetry.version()
-
-    [
-      span_prefix: span_prefix,
-      name_prefix: name_prefix,
-      tracer_id: tracer_id,
-      tracer_version: tracer_version
+  use MvOpentelemetry.SpanTracer,
+    name: :absinthe,
+    events: [
+      [:absinthe, :execute, :operation, :start],
+      [:absinthe, :execute, :operation, :stop],
+      [:absinthe, :execute, :operation, :exception],
+      [:absinthe, :resolve, :field, :start],
+      [:absinthe, :resolve, :field, :stop],
+      [:absinthe, :resolve, :field, :exception]
     ]
-  end
 
-  def handle_start_event([:absinthe, :resolve, :field, :start], _measurements, meta, opts) do
-    event_name = opts[:name_prefix] ++ [:resolve, :field]
+  def handle_event([:absinthe, :resolve, :field, :start], _measurements, meta, opts) do
+    event_name = [opts[:prefix]] ++ [:resolve, :field]
 
     resolution = meta.resolution
 
@@ -66,40 +33,42 @@ defmodule MvOpentelemetry.Absinthe do
       "graphql.field.schema": resolution.schema
     ]
 
-    OpentelemetryTelemetry.start_telemetry_span(@tracer_id, event_name, meta, %{})
+    OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
     |> Span.set_attributes(attributes)
+
+    :ok
   end
 
-  def handle_start_event([:absinthe, :execute, :operation, :start], _measurements, meta, opts) do
-    event_name = Enum.join(opts[:name_prefix] ++ [:execute, :operation], ".")
+  def handle_event([:absinthe, :execute, :operation, :start], _measurements, meta, opts) do
+    event_name = Enum.join([opts[:prefix]] ++ [:execute, :operation], ".")
 
     attributes = [
       "graphql.operation.input": meta.blueprint.input
     ]
 
-    OpentelemetryTelemetry.start_telemetry_span(@tracer_id, event_name, meta, %{})
+    OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
     |> Span.set_attributes(attributes)
 
     :ok
   end
 
-  def handle_stop_event([:absinthe, :resolve, :field, :stop], _measurements, meta, _opts) do
+  def handle_event([:absinthe, :resolve, :field, :stop], _measurements, meta, opts) do
     resolution = meta.resolution
-    ctx = OpentelemetryTelemetry.set_current_telemetry_span(@tracer_id, meta)
+    ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
 
     attributes = ["graphql.field.state": resolution.state]
 
     Span.set_attributes(ctx, attributes)
-    OpentelemetryTelemetry.end_telemetry_span(@tracer_id, meta)
+    OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
     :ok
   end
 
-  def handle_stop_event([:absinthe, :execute, :operation, :stop], _measurements, meta, _opts) do
-    ctx = OpentelemetryTelemetry.set_current_telemetry_span(@tracer_id, meta)
+  def handle_event([:absinthe, :execute, :operation, :stop], _measurements, meta, opts) do
+    ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
     attributes = ["graphql.operation.schema": meta.blueprint.schema]
 
     Span.set_attributes(ctx, attributes)
-    OpentelemetryTelemetry.end_telemetry_span(@tracer_id, meta)
+    OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
     :ok
   end
 end

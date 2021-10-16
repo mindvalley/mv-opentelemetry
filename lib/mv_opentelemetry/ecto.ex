@@ -82,6 +82,8 @@ defmodule MvOpentelemetry.Ecto do
 
     Tracer.start_span(span_name, span_opts)
     |> Span.end_span()
+
+    :ok
   end
 
   defp name(config, event, source) do

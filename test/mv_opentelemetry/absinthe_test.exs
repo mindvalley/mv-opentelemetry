@@ -3,7 +3,7 @@ defmodule MvOpentelemetry.AbsintheTest do
 
   test "sends otel events to pid", %{conn: conn} do
     :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-    MvOpentelemetry.Absinthe.register_tracer(tracer_id: :test_absinthe_tracer)
+    MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_tracer)
 
     query = """
     query{
@@ -43,15 +43,12 @@ defmodule MvOpentelemetry.AbsintheTest do
     assert {:"graphql.field.name", "pets"} in attributes
     assert {:"graphql.field.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
-    :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe, :handle_stop_event})
-
-    :ok =
-      :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe, :handle_start_event})
+    :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
   end
 
   test "sends error data to pid", %{conn: conn} do
     :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-    MvOpentelemetry.Absinthe.register_tracer(tracer_id: :test_absinthe_error_tracer)
+    MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_error_tracer)
 
     # Here be error
     query = """
@@ -84,14 +81,6 @@ defmodule MvOpentelemetry.AbsintheTest do
     assert {:"graphql.operation.input", query} in attributes
     assert {:"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
-    :ok =
-      :telemetry.detach(
-        {:test_absinthe_error_tracer, MvOpentelemetry.Absinthe, :handle_stop_event}
-      )
-
-    :ok =
-      :telemetry.detach(
-        {:test_absinthe_error_tracer, MvOpentelemetry.Absinthe, :handle_start_event}
-      )
+    :ok = :telemetry.detach({:test_absinthe_error_tracer, MvOpentelemetry.Absinthe})
   end
 end
