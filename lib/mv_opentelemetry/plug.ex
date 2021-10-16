@@ -66,12 +66,12 @@ defmodule MvOpentelemetry.Plug do
 
     event_name = (opts[:name_prefix] ++ [String.downcase(conn.method)]) |> Enum.join(".")
 
-    OpentelemetryTelemetry.start_telemetry_span(@tracer_id, event_name, meta, %{})
+    OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
     |> Span.set_attributes(attributes)
   end
 
-  def handle_stop_event(_, _, %{conn: conn} = meta, _) do
-    ctx = OpentelemetryTelemetry.set_current_telemetry_span(@tracer_id, meta)
+  def handle_stop_event(_, _, %{conn: conn} = meta, opts) do
+    ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
     Span.set_attribute(ctx, :"http.status", conn.status)
 
     if conn.status >= 400 do
@@ -79,7 +79,7 @@ defmodule MvOpentelemetry.Plug do
       Span.set_attributes(ctx, error: true)
     end
 
-    OpentelemetryTelemetry.end_telemetry_span(@tracer_id, meta)
+    OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
   end
 
   defp client_ip(conn) do

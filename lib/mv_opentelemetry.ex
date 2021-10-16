@@ -75,14 +75,13 @@ defmodule MvOpentelemetry do
     different repositories.
 
   ## LiveView
-    - `name_prefix` OPTIONAL telemetry prefix that will be emited in events, for example
-    [:my_app, :live_view]
-    - `tracer_id` OPTIONAL atom to identify tracers in case you want to listen to events from
+    - `prefix` OPTIONAL telemetry prefix that will be emited in events, for example
+    "my_app.phoenix". Defaults to "phoenix"
+    - `name` OPTIONAL atom to identify tracers in case you want to listen to events from
     live_view twice.
 
   ## Absinthe
-    - `name_prefix` OPTIONAL telemetry prefix that will be emited in events, defaults to
-    [:absinthe]
+    - `prefix` OPTIONAL telemetry prefix that will be emited in events, defaults to "absinthe"
 
   ## Plug
     - `span_prefix` OPTIONAL telemetry prefix to listen to. Defaults to [:phoenix, :endpoint]
