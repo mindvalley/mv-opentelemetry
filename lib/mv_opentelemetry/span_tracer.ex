@@ -4,8 +4,8 @@ defmodule MvOpentelemetry.SpanTracer do
   converting them into OpenTelemetry traces.
 
   You can define custom tracers modules and then register them at the start of your application.
-  At minimum, you are required to implement `c:handle_event/4`, which has exactly the same
-  prerequisites as other telemetry handlers.
+  You are required to implement at least `c:handle_event/4` callback, which has exactly the same
+  type signature as BEAM telemetry handlers.
 
   ## Example
 
@@ -65,13 +65,13 @@ defmodule MvOpentelemetry.SpanTracer do
 
   ## Optional Parameters
 
-  * `:name` - atom to register the handler with. Defaults to module name, but can be overriden if
+  * `:name` - atom to register the handler with. Defaults to module name, but can be changed if
   needed.
   * `:prefix` - atom or string that can be used generate span name. Defaults to current module
   name.
   * `version` - string to version the tracer within OpenTelemetry. Defaults to "0.1.0"
 
-  All optional parameters can be also overriden in `c:register_tracer/1` call site:
+  All optional parameters can be also provided in `c:register_tracer/1` call site:
 
   ```
   def MyApp do
