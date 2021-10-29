@@ -3,11 +3,9 @@ pipeline {
         label 'jenkins-slave'
     }
     options {
-        buildDiscarder(logRotator(numToKeepStr: '20'))
         disableConcurrentBuilds()
     }
     environment {
-        JenkinsDockerGCRSecret = credentials('mv-aux-gcr')
         SlackChannel = '#jenkins-ci-mv-opentelemetry'
         APP_NAME = 'mv-opentelemetry'
         MIX_ENV = 'test'
