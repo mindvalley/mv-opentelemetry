@@ -4,7 +4,6 @@ defmodule MvOpentelemetry.Plug do
   alias OpenTelemetry.Span
 
   @tracer_id __MODULE__
-  @tracer_version "0.1.0"
 
   def register_tracer(opts) do
     opts = handle_opts(opts)
@@ -34,7 +33,7 @@ defmodule MvOpentelemetry.Plug do
     span_prefix = opts[:span_prefix] || [:phoenix, :endpoint]
     name_prefix = opts[:name_prefix] || span_prefix
     tracer_id = opts[:tracer_id] || @tracer_id
-    tracer_version = opts[:tracer_version] || @tracer_version
+    tracer_version = opts[:tracer_version] || MvOpentelemetry.version()
 
     [
       span_prefix: span_prefix,
@@ -45,7 +44,7 @@ defmodule MvOpentelemetry.Plug do
   end
 
   def handle_start_event(_, _, %{conn: conn} = meta, opts) do
-    :otel_propagator.text_map_extract(conn.req_headers)
+    :otel_propagator_text_map.extract(conn.req_headers)
 
     request_id = :proplists.get_value("x-request-id", conn.resp_headers, "")
     user_agent = :proplists.get_value("user-agent", conn.req_headers, "")

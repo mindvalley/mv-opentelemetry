@@ -14,7 +14,6 @@ Somewhere in your application startup, for example in Application.start/2:
 
 ```elixir
 def start(_type, _args) do
-  :ok = MvOpentelemetry.register_application(:my_app)
   :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :repo])
 
   :ok =
@@ -69,14 +68,14 @@ end
 ## Installation
 
 The package can be installed by adding `mv_opentelemetry` to your list of
-dependencies in `mix.exs`. In this example, we'll use `opentelemetry_honeycomb`
-as the processor.
+dependencies in `mix.exs`. In this example, we'll use `opentelemetry_exporter`
+which can send data to any OTLP enabled collector.
 
 ```elixir
 def deps do
   [
     {:mv_opentelemetry, git: "git@github.com:mindvalley/mv-opentelemetry.git"},
-    {:opentelemetry_honeycomb, "~> 0.5.0-rc.1"}
+    {:opentelemetry_exporter, "~> 1.0.0-rc.3"},
   ]
 end
 ```
@@ -91,7 +90,14 @@ config :opentelemetry,
   processors: [
     otel_batch_processor: %{
       exporter:
-        {OpenTelemetry.Honeycomb.Exporter, write_key: "REPLACE_ME", dataset: "REPLACE_ME"}
+        {:opentelemetry_exporter,
+         %{
+           endpoints: [{:https, 'api.honeycomb.io', 443, '/v1/traces'}],
+           headers: [
+             {"x-honeycomb-team", "REPLACE_ME"},
+             {"x-honeycomb-dataset", "REPLACE_ME"}
+           ]
+         }}
     }
   ]
 ```

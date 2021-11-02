@@ -12,7 +12,6 @@ defmodule MvOpentelemetry do
   # Somewhere in your application startup, for example in Application.start/2:
 
   def start(_type, _args) do
-    :ok = MvOpentelemetry.register_application(:my_app)
     :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :repo])
 
     :ok =
@@ -31,16 +30,6 @@ defmodule MvOpentelemetry do
   resolvers, ensure that each of the structs implements the MvOpentelemetry.Sanitizer protocol.
   ```
   """
-
-  @doc """
-  Registers an application tracer for your OTP application. Should be called only once
-  per application startup.
-  """
-  @spec register_application(atom()) :: :ok
-  def register_application(atom) do
-    true = :opentelemetry.register_application_tracer(atom)
-    :ok
-  end
 
   @doc """
   Convert a data structure into another one, that is safe to store in a tracing backend
@@ -68,6 +57,9 @@ defmodule MvOpentelemetry do
   """
   @spec register_tracer(:ecto | :plug | :live_view | :absinthe) :: :ok
   def register_tracer(atom), do: register_tracer(atom, [])
+
+  @doc false
+  def version, do: "1.0.0-rc.3"
 
   @doc """
   Registers tracer for given functional area with options.

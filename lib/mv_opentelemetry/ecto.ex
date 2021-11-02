@@ -6,7 +6,6 @@ defmodule MvOpentelemetry.Ecto do
   alias OpenTelemetry.Tracer
 
   @tracer_id __MODULE__
-  @tracer_version "0.1.0"
 
   @time_attributes [:decode_time, :query_time, :queue_time]
 
@@ -32,7 +31,7 @@ defmodule MvOpentelemetry.Ecto do
 
     name_prefix = opts[:name_prefix] || span_prefix
     tracer_id = opts[:tracer_id] || @tracer_id
-    tracer_version = opts[:tracer_version] || @tracer_version
+    tracer_version = opts[:tracer_version] || MvOpentelemetry.version()
 
     [
       span_prefix: span_prefix,
