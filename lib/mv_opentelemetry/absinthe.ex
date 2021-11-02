@@ -5,7 +5,6 @@ defmodule MvOpentelemetry.Absinthe do
   alias OpenTelemetry.Span
 
   @tracer_id __MODULE__
-  @tracer_version "0.1.0"
 
   @absinthe_events [[:absinthe, :execute, :operation], [:absinthe, :resolve, :field]]
 
@@ -36,7 +35,7 @@ defmodule MvOpentelemetry.Absinthe do
     span_prefix = [:absinthe]
     name_prefix = opts[:name_prefix] || span_prefix
     tracer_id = opts[:tracer_id] || @tracer_id
-    tracer_version = opts[:tracer_version] || @tracer_version
+    tracer_version = opts[:tracer_version] || MvOpentelemetry.version()
 
     [
       span_prefix: span_prefix,

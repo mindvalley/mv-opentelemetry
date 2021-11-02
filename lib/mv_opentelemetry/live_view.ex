@@ -4,7 +4,6 @@ defmodule MvOpentelemetry.LiveView do
   alias OpenTelemetry.Span
 
   @tracer_id __MODULE__
-  @tracer_version "0.1.0"
 
   @live_view_events [
     [:phoenix, :live_view, :mount, :start],
@@ -42,7 +41,7 @@ defmodule MvOpentelemetry.LiveView do
   defp handle_opts(opts) do
     name_prefix = Access.get(opts, :name_prefix, [:phoenix])
     tracer_id = opts[:tracer_id] || @tracer_id
-    tracer_version = opts[:tracer_version] || @tracer_version
+    tracer_version = opts[:tracer_version] || MvOpentelemetry.version()
 
     [
       name_prefix: name_prefix,
