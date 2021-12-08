@@ -22,11 +22,14 @@ defmodule MvOpentelemetry.LiveView do
     Enum.join(list, ".")
   end
 
+  @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
   def handle_event([:phoenix, :live_view, :mount, :start] = event, _measurements, meta, opts) do
     attributes = [
-      "live_view.view": meta.socket.view,
-      "live_view.params": meta.params
+      {"live_view.view", meta.socket.view}
     ]
+
+    params_attributes = Enum.map(meta.params, &namespace_key(&1, "live_view.params"))
+    attributes = attributes ++ params_attributes
 
     name = get_name(event, opts)
 
@@ -43,10 +46,12 @@ defmodule MvOpentelemetry.LiveView do
         opts
       ) do
     attributes = [
-      "live_view.view": meta.socket.view,
-      "live_view.params": meta.params,
-      "live_view.uri": meta.uri
+      {"live_view.view", meta.socket.view},
+      {"live_view.uri", meta.uri}
     ]
+
+    params_attributes = Enum.map(meta.params, &namespace_key(&1, "live_view.params"))
+    attributes = attributes ++ params_attributes
 
     name = get_name(event, opts)
 
@@ -63,13 +68,15 @@ defmodule MvOpentelemetry.LiveView do
         opts
       ) do
     attributes = [
-      "live_view.view": meta.socket.view,
-      "live_view.params": meta.params,
-      "live_view.uri": meta.uri,
-      "live_view.event": meta.event
+      {"live_view.view", meta.socket.view},
+      {"live_view.uri", meta.uri},
+      {"live_view.event", meta.event}
     ]
 
     name = get_name(event, opts)
+
+    params_attributes = Enum.map(meta.params, &namespace_key(&1, "live_view.params"))
+    attributes = attributes ++ params_attributes
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], name, meta, %{})
     |> Span.set_attributes(attributes)
@@ -84,11 +91,11 @@ defmodule MvOpentelemetry.LiveView do
         opts
       ) do
     attributes = [
-      "live_component.view": meta.socket.view,
-      "live_component.event": meta.event,
-      "live_component.component": meta.component,
-      "live_component.host_uri": meta.socket.host_uri,
-      "live_component.uri": meta.uri
+      {"live_component.view", meta.socket.view},
+      {"live_component.event", meta.event},
+      {"live_component.component", meta.component},
+      {"live_component.host_uri", meta.socket.host_uri},
+      {"live_component.uri", meta.uri}
     ]
 
     name = get_name(event, opts)
@@ -104,8 +111,8 @@ defmodule MvOpentelemetry.LiveView do
     Span.set_status(ctx, OpenTelemetry.status(:error, ""))
 
     attributes = [
-      "live_view.kind": meta.kind,
-      "live_view.reason": meta.reason,
+      {"live_view.kind", meta.kind},
+      {"live_view.reason", meta.reason},
       error: true
     ]
 
@@ -119,8 +126,8 @@ defmodule MvOpentelemetry.LiveView do
     Span.set_status(ctx, OpenTelemetry.status(:error, ""))
 
     attributes = [
-      "live_component.kind": meta.kind,
-      "live_component.reason": meta.reason,
+      {"live_component.kind", meta.kind},
+      {"live_component.reason", meta.reason},
       error: true
     ]
 
@@ -133,5 +140,10 @@ defmodule MvOpentelemetry.LiveView do
     _ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
     :ok
+  end
+
+  defp namespace_key({key, value}, prefix) when is_binary(key) do
+    complete_key = prefix <> "." <> key
+    {complete_key, value}
   end
 end

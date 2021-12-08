@@ -5,6 +5,7 @@ defmodule MvOpentelemetry.Plug do
 
   @tracer_id __MODULE__
 
+  @spec register_tracer(opts :: Access.t()) :: :ok
   def register_tracer(opts) do
     opts = handle_opts(opts)
     prefix = opts[:span_prefix]
@@ -43,6 +44,7 @@ defmodule MvOpentelemetry.Plug do
     ]
   end
 
+  @spec handle_start_event(_ :: any(), _ :: any(), %{conn: Plug.Conn.t()}, Access.t()) :: :ok
   def handle_start_event(_, _, %{conn: conn} = meta, opts) do
     :otel_propagator_text_map.extract(conn.req_headers)
 
@@ -52,27 +54,33 @@ defmodule MvOpentelemetry.Plug do
     client_ip = client_ip(conn)
 
     attributes = [
-      "http.client_ip": client_ip,
-      "http.host": conn.host,
-      "http.method": conn.method,
-      "http.scheme": "#{conn.scheme}",
-      "http.request_path": conn.request_path,
-      "http.request_id": request_id,
-      "http.user_agent": user_agent,
-      "http.path_params": conn.path_params,
-      "http.query_params": conn.query_params,
-      "http.referer": referer
+      {"http.client_ip", client_ip},
+      {"http.host", conn.host},
+      {"http.method", conn.method},
+      {"http.scheme", "#{conn.scheme}"},
+      {"http.request_path", conn.request_path},
+      {"http.request_id", request_id},
+      {"http.user_agent", user_agent},
+      {"http.referer", referer}
     ]
+
+    query_attributes = Enum.map(conn.query_params, &namespace_key(&1, "http.query_params"))
+    path_attributes = Enum.map(conn.path_params, &namespace_key(&1, "http.path_params"))
+
+    attributes = attributes ++ query_attributes ++ path_attributes
 
     event_name = (opts[:name_prefix] ++ [String.downcase(conn.method)]) |> Enum.join(".")
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
     |> Span.set_attributes(attributes)
+
+    :ok
   end
 
+  @spec handle_stop_event(_ :: any(), _ :: any(), %{conn: Plug.Conn.t()}, Access.t()) :: :ok
   def handle_stop_event(_, _, %{conn: conn} = meta, opts) do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
-    Span.set_attribute(ctx, :"http.status", conn.status)
+    Span.set_attribute(ctx, "http.status", conn.status)
 
     if conn.status >= 400 do
       Span.set_status(ctx, OpenTelemetry.status(:error, ""))
@@ -80,6 +88,11 @@ defmodule MvOpentelemetry.Plug do
     end
 
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
+  end
+
+  defp namespace_key({key, value}, prefix) when is_binary(key) do
+    complete_key = prefix <> "." <> key
+    {complete_key, value}
   end
 
   defp client_ip(conn) do

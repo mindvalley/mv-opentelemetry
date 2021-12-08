@@ -13,20 +13,20 @@ defmodule MvOpentelemetry.PlugTest do
     conn
     |> put_req_header("user-agent", "Phoenix Test")
     |> put_req_header("referer", "http://localhost")
-    |> get("/", %{})
+    |> get("/?query=1234&user_id=", %{})
 
     assert_receive {:span, span(name: "mv_harness.request.get") = span_record}
     attributes = span(span_record, :attributes)
+    keys = Enum.map(attributes, fn {k, _v} -> k end)
 
-    assert {:"http.status", 200} in attributes
-    assert {:"http.method", "GET"} in attributes
-    assert attributes[:"http.user_agent"]
-    assert attributes[:"http.request_id"]
-    assert attributes[:"http.path_params"] == %{}
-    assert attributes[:"http.query_params"] == %{}
-    assert attributes[:"http.client_ip"]
-    assert attributes[:"http.user_agent"] == "Phoenix Test"
-    assert attributes[:"http.referer"] == "http://localhost"
+    assert {"http.status", 200} in attributes
+    assert {"http.method", "GET"} in attributes
+    assert {"http.query_params.query", "1234"} in attributes
+    assert {"http.query_params.user_id", ""} in attributes
+    assert {"http.user_agent", "Phoenix Test"} in attributes
+    assert {"http.referer", "http://localhost"} in attributes
+    assert "http.request_id" in keys
+    assert "http.client_ip" in keys
 
     :ok = :telemetry.detach({:test_plug_tracer, MvOpentelemetry.Plug, :handle_start_event})
     :ok = :telemetry.detach({:test_plug_tracer, MvOpentelemetry.Plug, :handle_stop_event})
