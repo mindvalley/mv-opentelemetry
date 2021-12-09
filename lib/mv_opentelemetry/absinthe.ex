@@ -29,8 +29,8 @@ defmodule MvOpentelemetry.Absinthe do
     resolution = meta.resolution
 
     attributes = [
-      "graphql.field.name": resolution.definition.name,
-      "graphql.field.schema": resolution.schema
+      {"graphql.field.name", resolution.definition.name},
+      {"graphql.field.schema", resolution.schema}
     ]
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
@@ -42,9 +42,7 @@ defmodule MvOpentelemetry.Absinthe do
   def handle_event([:absinthe, :execute, :operation, :start], _measurements, meta, opts) do
     event_name = Enum.join([opts[:prefix]] ++ [:execute, :operation], ".")
 
-    attributes = [
-      "graphql.operation.input": meta.blueprint.input
-    ]
+    attributes = [{"graphql.operation.input", meta.blueprint.input}]
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
     |> Span.set_attributes(attributes)
@@ -56,7 +54,7 @@ defmodule MvOpentelemetry.Absinthe do
     resolution = meta.resolution
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
 
-    attributes = ["graphql.field.state": resolution.state]
+    attributes = [{"graphql.field.state", resolution.state}]
 
     Span.set_attributes(ctx, attributes)
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
@@ -65,7 +63,7 @@ defmodule MvOpentelemetry.Absinthe do
 
   def handle_event([:absinthe, :execute, :operation, :stop], _measurements, meta, opts) do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
-    attributes = ["graphql.operation.schema": meta.blueprint.schema]
+    attributes = [{"graphql.operation.schema", meta.blueprint.schema}]
 
     Span.set_attributes(ctx, attributes)
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)

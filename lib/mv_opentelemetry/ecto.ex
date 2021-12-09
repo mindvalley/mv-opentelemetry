@@ -67,12 +67,12 @@ defmodule MvOpentelemetry.Ecto do
       end
 
     base_attributes = [
-      "db.type": db_type,
-      "db.statement": query,
-      "db.source": source,
-      "db.instance": repo_config[:database],
-      "db.url": url,
-      "db.total_time_microseconds": convert_time(total_time)
+      {"db.type", db_type},
+      {"db.statement", query},
+      {"db.source", source},
+      {"db.instance", repo_config[:database]},
+      {"db.url", url},
+      {"db.total_time_microseconds", convert_time(total_time)}
     ]
 
     all_attributes = result ++ base_attributes ++ time_attributes(measurements)
