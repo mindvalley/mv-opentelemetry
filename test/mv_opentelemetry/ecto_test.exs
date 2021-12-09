@@ -14,13 +14,14 @@ defmodule MvOpentelemetry.EctoTest do
     assert_receive {:span, span_record}
     assert "mv_opentelemetry_harness.repo.pages" == span(span_record, :name)
     attributes = span(span_record, :attributes)
+    keys = Enum.map(attributes, fn {k, _v} -> k end)
 
-    assert {:"db.source", "pages"} in attributes
-    assert {:"db.type", :sql} in attributes
-    assert attributes[:"db.statement"]
-    assert attributes[:"db.instance"]
-    assert attributes[:"db.url"]
-    assert attributes[:"db.total_time_microseconds"]
+    assert {"db.source", "pages"} in attributes
+    assert {"db.type", :sql} in attributes
+    assert "db.statement" in keys
+    assert "db.instance" in keys
+    assert "db.url" in keys
+    assert "db.total_time_microseconds" in keys
 
     :ok = :telemetry.detach({:test_ecto_tracer, MvOpentelemetry.Ecto, :handle_event})
   end

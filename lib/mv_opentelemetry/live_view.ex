@@ -24,9 +24,7 @@ defmodule MvOpentelemetry.LiveView do
 
   @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
   def handle_event([:phoenix, :live_view, :mount, :start] = event, _measurements, meta, opts) do
-    attributes = [
-      {"live_view.view", meta.socket.view}
-    ]
+    attributes = [{"live_view.view", meta.socket.view}]
 
     params_attributes = Enum.map(meta.params, &namespace_key(&1, "live_view.params"))
     attributes = attributes ++ params_attributes
@@ -45,10 +43,7 @@ defmodule MvOpentelemetry.LiveView do
         meta,
         opts
       ) do
-    attributes = [
-      {"live_view.view", meta.socket.view},
-      {"live_view.uri", meta.uri}
-    ]
+    attributes = [{"live_view.view", meta.socket.view}, {"live_view.uri", meta.uri}]
 
     params_attributes = Enum.map(meta.params, &namespace_key(&1, "live_view.params"))
     attributes = attributes ++ params_attributes
@@ -113,7 +108,7 @@ defmodule MvOpentelemetry.LiveView do
     attributes = [
       {"live_view.kind", meta.kind},
       {"live_view.reason", meta.reason},
-      error: true
+      {"error", true}
     ]
 
     Span.set_attributes(ctx, attributes)
@@ -128,7 +123,7 @@ defmodule MvOpentelemetry.LiveView do
     attributes = [
       {"live_component.kind", meta.kind},
       {"live_component.reason", meta.reason},
-      error: true
+      {"error", true}
     ]
 
     Span.set_attributes(ctx, attributes)
