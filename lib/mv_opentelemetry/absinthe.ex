@@ -55,7 +55,7 @@ defmodule MvOpentelemetry.Absinthe do
   end
 
   def handle_event([:dataloader, :source, :batch, :run, :start], _measurements, meta, opts) do
-    event_name = [opts[:prefix]] ++ [:resolve, :field]
+    event_name = [opts[:prefix]] ++ [:batch, :field]
 
     resolution = meta.resolution
 
