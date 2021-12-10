@@ -10,8 +10,8 @@ defmodule MvOpentelemetry.Absinthe do
       [:absinthe, :resolve, :field, :start],
       [:absinthe, :resolve, :field, :stop],
       [:absinthe, :resolve, :field, :exception],
-      [:absinthe, :middleware, :batch, :start],
-      [:absinthe, :middleware, :batch, :stop]
+      [:dataloader, :source, :batch, :run, :start],
+      [:dataloader, :source, :batch, :run, :stop]
     ]
 
   def handle_event([:absinthe, :resolve, :field, :start], _measurements, meta, opts) do
@@ -54,6 +54,33 @@ defmodule MvOpentelemetry.Absinthe do
     :ok
   end
 
+  def handle_event([:dataloader, :source, :batch, :run, :start], _measurements, meta, opts) do
+    event_name = [opts[:prefix]] ++ [:resolve, :field]
+
+    resolution = meta.resolution
+
+    event_name =
+      case resolution.definition.name do
+        x when is_bitstring(x) ->
+          Enum.join(event_name ++ [x], ".")
+
+        _ ->
+          Enum.join(event_name, ".")
+      end
+
+    resolution = meta.resolution
+
+    attributes = [
+      "graphql.field.name": resolution.definition.name,
+      "graphql.field.schema": resolution.schema
+    ]
+
+    OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
+    |> Span.set_attributes(attributes)
+
+    :ok
+  end
+
   def handle_event([:absinthe, :resolve, :field, :stop], _measurements, meta, opts) do
     resolution = meta.resolution
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
@@ -66,6 +93,15 @@ defmodule MvOpentelemetry.Absinthe do
   end
 
   def handle_event([:absinthe, :execute, :operation, :stop], _measurements, meta, opts) do
+    ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
+    attributes = ["graphql.operation.schema": meta.blueprint.schema]
+
+    Span.set_attributes(ctx, attributes)
+    OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
+    :ok
+  end
+
+  def handle_event([:dataloader, :source, :batch, :run, :stop], _measurements, meta, opts) do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
     attributes = ["graphql.operation.schema": meta.blueprint.schema]
 

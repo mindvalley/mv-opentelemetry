@@ -39,6 +39,7 @@ config :mv_opentelemetry_harness, MvOpentelemetryHarness.Repo,
     System.get_env("POSTGRES_ROOT_PASSWORD") || System.get_env("POSTGRES_PASSWORD") || "postgres",
   database: "mv_opentelemetry_harness_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: System.get_env("POSTGRES_HOST") || "localhost",
+  port: System.get_env("POSTGRES_PORT") || 5432,
   pool: Ecto.Adapters.SQL.Sandbox
 
 # Print only warnings and errors during test
