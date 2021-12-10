@@ -9,7 +9,9 @@ defmodule MvOpentelemetry.Absinthe do
       [:absinthe, :execute, :operation, :exception],
       [:absinthe, :resolve, :field, :start],
       [:absinthe, :resolve, :field, :stop],
-      [:absinthe, :resolve, :field, :exception]
+      [:absinthe, :resolve, :field, :exception],
+      [:absinthe, :middleware, :batch, :start],
+      [:absinthe, :middleware, :batch, :stop]
     ]
 
   def handle_event([:absinthe, :resolve, :field, :start], _measurements, meta, opts) do
