@@ -26,7 +26,7 @@ defmodule MvOpentelemetry.LiveView do
   def handle_event([:phoenix, :live_view, :mount, :start] = event, _measurements, meta, opts) do
     attributes = [{"live_view.view", meta.socket.view}]
 
-    params_attributes = Enum.map(meta.params, &namespace_key(&1, "live_view.params"))
+    params_attributes = Enum.map(meta.params, &prefix_key_with(&1, "live_view.params"))
     attributes = attributes ++ params_attributes
 
     name = get_name(event, opts)
@@ -45,7 +45,7 @@ defmodule MvOpentelemetry.LiveView do
       ) do
     attributes = [{"live_view.view", meta.socket.view}, {"live_view.uri", meta.uri}]
 
-    params_attributes = Enum.map(meta.params, &namespace_key(&1, "live_view.params"))
+    params_attributes = Enum.map(meta.params, &prefix_key_with(&1, "live_view.params"))
     attributes = attributes ++ params_attributes
 
     name = get_name(event, opts)
@@ -70,7 +70,7 @@ defmodule MvOpentelemetry.LiveView do
 
     name = get_name(event, opts)
 
-    params_attributes = Enum.map(meta.params, &namespace_key(&1, "live_view.params"))
+    params_attributes = Enum.map(meta.params, &prefix_key_with(&1, "live_view.params"))
     attributes = attributes ++ params_attributes
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], name, meta, %{})
@@ -137,7 +137,7 @@ defmodule MvOpentelemetry.LiveView do
     :ok
   end
 
-  defp namespace_key({key, value}, prefix) when is_binary(key) do
+  defp prefix_key_with({key, value}, prefix) when is_binary(key) do
     complete_key = prefix <> "." <> key
     {complete_key, value}
   end
