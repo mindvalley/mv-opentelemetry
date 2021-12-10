@@ -64,8 +64,8 @@ defmodule MvOpentelemetry.Plug do
       {"http.referer", referer}
     ]
 
-    query_attributes = Enum.map(conn.query_params, &namespace_key(&1, "http.query_params"))
-    path_attributes = Enum.map(conn.path_params, &namespace_key(&1, "http.path_params"))
+    query_attributes = Enum.map(conn.query_params, &prefix_key_with(&1, "http.query_params"))
+    path_attributes = Enum.map(conn.path_params, &prefix_key_with(&1, "http.path_params"))
 
     attributes = attributes ++ query_attributes ++ path_attributes
 
@@ -90,7 +90,7 @@ defmodule MvOpentelemetry.Plug do
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
   end
 
-  defp namespace_key({key, value}, prefix) when is_binary(key) do
+  defp prefix_key_with({key, value}, prefix) when is_binary(key) do
     complete_key = prefix <> "." <> key
     {complete_key, value}
   end
