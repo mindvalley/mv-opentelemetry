@@ -6,12 +6,13 @@ defmodule MvOpentelemetryHarnessWeb.Schema do
 
   # Example data
   @items %{
-    "foo" => %Human{id: "foo", name: "Stephen", pets: [%Pet{name: "Pinky"}, %Pet{name: "Brain"}]},
+    "foo" => %Human{id: "foo", name: "Stephen", pets: [%Pet{id: 1, name: "Pinky"}, %Pet{id: 2, name: "Brain"}]},
     "bar" => %Human{id: "bar", name: "Bar"}
   }
 
   object :pet do
     field :name, :string
+    field :id, :string
   end
 
   object :human do

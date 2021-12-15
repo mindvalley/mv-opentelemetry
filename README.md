@@ -25,6 +25,7 @@ def start(_type, _args) do
   :ok = MvOpentelemetry.register_tracer(:plug)
   :ok = MvOpentelemetry.register_tracer(:live_view)
   :ok = MvOpentelemetry.register_tracer(:absinthe)
+  :ok = MvOpentelemetry.register_tracer(:dataloader)
 end
 ```
 
