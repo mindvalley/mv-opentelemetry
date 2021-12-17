@@ -52,18 +52,18 @@ defmodule MvOpentelemetry do
   end
 
   @doc """
-  Registers tracer for given functional area. Allowed areas are: :ecto, :plug, :absinthe
-  and :live_view
+  Registers tracer for given functional area. Allowed areas are: :ecto, :plug, :absinthe,
+  :dataloader and :live_view
   """
-  @spec register_tracer(:ecto | :plug | :live_view | :absinthe) :: :ok
+  @spec register_tracer(:ecto | :plug | :live_view | :absinthe | :dataloader) :: :ok
   def register_tracer(atom), do: register_tracer(atom, [])
 
   @doc false
-  def version, do: "1.0.0-rc.3"
+  def version, do: "1.0.0-rc.3.2"
 
   @doc """
   Registers tracer for given functional area with options.
-  Allowed areas are: :ecto, :phoenix and :live_view.
+  Allowed areas are: :absinthe, :dataloader, :ecto, :phoenix and :live_view.
   You can also provide following options:
 
   ## Ecto
@@ -83,6 +83,9 @@ defmodule MvOpentelemetry do
   ## Absinthe
     - `prefix` OPTIONAL telemetry prefix that will be emited in events, defaults to "absinthe"
 
+  ## Dataloader
+  Accepts no arguments.
+
   ## Plug
     - `span_prefix` OPTIONAL telemetry prefix to listen to. Defaults to [:phoenix, :endpoint]
     - `name_prefix` OPTIONAL telemetry prefix that will be emited in events, for example
@@ -90,8 +93,9 @@ defmodule MvOpentelemetry do
     - `tracer_id` OPTIONAL atom to identify tracers in case you want to listen to events from
     Plug.Telemetry twice.
   """
-  @spec register_tracer(:absinthe | :ecto | :plug | :live_view, Access.t()) :: :ok
+  @spec register_tracer(:absinthe | :dataloader | :ecto | :plug | :live_view, Access.t()) :: :ok
   def register_tracer(:absinthe, opts), do: MvOpentelemetry.Absinthe.register_tracer(opts)
+  def register_tracer(:dataloader, opts), do: MvOpentelemetry.Dataloader.register_tracer(opts)
   def register_tracer(:ecto, opts), do: MvOpentelemetry.Ecto.register_tracer(opts)
   def register_tracer(:plug, opts), do: MvOpentelemetry.Plug.register_tracer(opts)
   def register_tracer(:live_view, opts), do: MvOpentelemetry.LiveView.register_tracer(opts)
