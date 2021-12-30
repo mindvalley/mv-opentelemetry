@@ -23,7 +23,8 @@ defmodule MvOpentelemetry.EctoTest do
     assert "db.url" in keys
     assert "db.total_time_microseconds" in keys
 
-    :ok = :telemetry.detach({:test_ecto_tracer, MvOpentelemetry.Ecto, :handle_event})
+    :ok =
+      :telemetry.detach({[:mv_opentelemetry_harness, :repo], MvOpentelemetry.Ecto, :handle_event})
   end
 
   test "raises when span_prefix is not given" do
@@ -34,6 +35,6 @@ defmodule MvOpentelemetry.EctoTest do
     end
 
     {:error, :not_found} =
-      :telemetry.detach({:test_ecto_tracer, MvOpentelemetry.Ecto, :handle_event})
+      :telemetry.detach({[:mv_opentelemetry_harness, :repo], MvOpentelemetry.Ecto, :handle_event})
   end
 end
