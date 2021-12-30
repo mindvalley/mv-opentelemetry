@@ -13,13 +13,7 @@ defmodule MvOpentelemetry do
 
   def start(_type, _args) do
     :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :repo])
-
-    :ok =
-      MvOpentelemetry.register_tracer(:ecto,
-        span_prefix: [:my_app, :replica_repo],
-        tracer_id: :replica
-      )
-
+    :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :replica_repo])
     :ok = MvOpentelemetry.register_tracer(:plug)
     :ok = MvOpentelemetry.register_tracer(:live_view)
   end
@@ -71,8 +65,6 @@ defmodule MvOpentelemetry do
     [:my_app, :repo] is the right choice.
     - `name_prefix` OPTIONAL telemetry prefix that will be emited in events, for example
     [:my_app, :ecto]
-    - `tracer_id` OPTIONAL atom to identify tracers in case you want to listen to events from
-    different repositories.
 
   ## LiveView
     - `prefix` OPTIONAL telemetry prefix that will be emited in events, for example

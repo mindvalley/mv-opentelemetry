@@ -9,13 +9,13 @@ defmodule MvOpentelemetry.Ecto do
 
   @time_attributes [:decode_time, :query_time, :queue_time]
 
+  @spec register_tracer(Access.t()) :: :ok | {:error, :already_exists}
   def register_tracer(opts) do
     opts = handle_opts(opts)
     prefix = opts[:span_prefix]
-    tracer_id = opts[:tracer_id]
 
     :telemetry.attach(
-      {tracer_id, __MODULE__, :handle_event},
+      {prefix, __MODULE__, :handle_event},
       prefix ++ [:query],
       &__MODULE__.handle_event/4,
       opts

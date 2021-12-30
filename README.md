@@ -15,13 +15,7 @@ Somewhere in your application startup, for example in Application.start/2:
 ```elixir
 def start(_type, _args) do
   :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :repo])
-
-  :ok =
-    MvOpentelemetry.register_tracer(:ecto,
-      span_prefix: [:my_app, :replica_repo],
-      tracer_id: :replica
-    )
-
+  :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :replica_repo])
   :ok = MvOpentelemetry.register_tracer(:plug)
   :ok = MvOpentelemetry.register_tracer(:live_view)
   :ok = MvOpentelemetry.register_tracer(:absinthe)
