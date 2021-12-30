@@ -18,8 +18,8 @@ defmodule MvOpentelemetry.OpenTelemetryCase do
       @endpoint MvOpentelemetryHarnessWeb.Endpoint
 
       require Record
-      @fields Record.extract(:span, from_lib: "opentelemetry/include/otel_span.hrl")
-      Record.defrecordp(:span, @fields)
+      @span Record.extract(:span, from_lib: "opentelemetry/include/otel_span.hrl")
+      Record.defrecordp(:span, @span)
     end
   end
 

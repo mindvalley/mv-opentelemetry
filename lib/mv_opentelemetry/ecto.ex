@@ -13,8 +13,6 @@ defmodule MvOpentelemetry.Ecto do
     opts = handle_opts(opts)
     prefix = opts[:span_prefix]
     tracer_id = opts[:tracer_id]
-    tracer_version = opts[:tracer_version]
-    :opentelemetry.register_tracer(tracer_id, tracer_version)
 
     :telemetry.attach(
       {tracer_id, __MODULE__, :handle_event},
@@ -41,6 +39,7 @@ defmodule MvOpentelemetry.Ecto do
     ]
   end
 
+  @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
   def handle_event(event, measurements, meta, config) do
     %{query: query, source: source, result: query_result, repo: repo, type: type} = meta
     total_time = measurements.total_time

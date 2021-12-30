@@ -34,8 +34,8 @@ defmodule MvOpentelemetry.DataloaderTest do
 
     assert_receive {:span, span_record}
     assert "dataloader.source.batch.run" == span(span_record, :name)
-    attributes = span(span_record, :attributes)
-    assert attributes == []
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+    assert attributes == %{}
 
     :ok = :telemetry.detach({:test_dataloader_tracer, MvOpentelemetry.Dataloader})
   end
@@ -50,9 +50,9 @@ defmodule MvOpentelemetry.DataloaderTest do
 
     assert_receive {:span, span_record}
     assert "dataloader.source.run" == span(span_record, :name)
-    attributes = span(span_record, :attributes)
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert attributes == []
+    assert attributes == %{}
 
     :ok = :telemetry.detach({:test_dataloader_tracer, MvOpentelemetry.Dataloader})
   end

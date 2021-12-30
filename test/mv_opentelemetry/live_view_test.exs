@@ -1,4 +1,4 @@
-defmodule MvOpentelemetry.LiveViewTest do
+ defmodule MvOpentelemetry.LiveViewTest do
   use MvOpentelemetry.OpenTelemetryCase
   import Phoenix.LiveViewTest
 
@@ -10,13 +10,13 @@ defmodule MvOpentelemetry.LiveViewTest do
     assert html =~ "LiveLive"
 
     assert_receive {:span, span(name: "phoenix.live_view.mount") = span_record}
-    attributes = span(span_record, :attributes)
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     assert {"live_view.params.live_id", "11"} in attributes
 
     assert_receive {:span, span(name: "phoenix.live_view.handle_params") = span_record}
-    attributes = span(span_record, :attributes)
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     assert {"live_view.params.live_id", "11"} in attributes
