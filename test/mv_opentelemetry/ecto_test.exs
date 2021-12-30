@@ -13,7 +13,7 @@ defmodule MvOpentelemetry.EctoTest do
 
     assert_receive {:span, span_record}
     assert "mv_opentelemetry_harness.repo.pages" == span(span_record, :name)
-    attributes = span(span_record, :attributes)
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
     assert {"db.source", "pages"} in attributes

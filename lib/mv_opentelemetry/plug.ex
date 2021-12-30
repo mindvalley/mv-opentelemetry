@@ -10,8 +10,6 @@ defmodule MvOpentelemetry.Plug do
     opts = handle_opts(opts)
     prefix = opts[:span_prefix]
     tracer_id = opts[:tracer_id]
-    tracer_version = opts[:tracer_version]
-    :opentelemetry.register_tracer(tracer_id, tracer_version)
 
     :ok =
       :telemetry.attach(

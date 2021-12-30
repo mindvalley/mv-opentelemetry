@@ -38,11 +38,11 @@ defmodule MvOpentelemetry.MixProject do
     [
       # OpenTelemetry
       {:opentelemetry_telemetry, "~> 1.0.0-beta.2"},
-      {:opentelemetry_api, "~> 1.0.0-rc.3", override: true},
+      {:opentelemetry_api, "~> 1.0.0-rc.4", override: true},
 
       # Test and development harness
-      {:opentelemetry, "~> 1.0.0-rc.3", only: [:dev, :test]},
-      {:opentelemetry_exporter, "~> 1.0.0-rc.3", only: [:dev, :test]},
+      {:opentelemetry, "~> 1.0.0-rc.4", only: [:dev, :test]},
+      {:opentelemetry_exporter, "~> 1.0.0-rc.4", only: [:dev, :test]},
       {:mv_opentelemetry_harness, path: "./mv_opentelemetry_harness", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:floki, ">= 0.30.0", only: :test},

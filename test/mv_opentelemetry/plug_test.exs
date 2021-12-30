@@ -16,7 +16,7 @@ defmodule MvOpentelemetry.PlugTest do
     |> get("/?query=1234&user_id=", %{})
 
     assert_receive {:span, span(name: "mv_harness.request.get") = span_record}
-    attributes = span(span_record, :attributes)
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
     assert {"http.status", 200} in attributes

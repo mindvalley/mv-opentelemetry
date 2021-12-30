@@ -110,10 +110,7 @@ defmodule MvOpentelemetry.SpanTracer do
         prefix = Access.get(opts, :prefix, unquote(prefix))
         name = Access.get(opts, :name, unquote(name))
         version = Access.get(opts, :version, unquote(tracer_version))
-
         opts_with_defaults = merge_defaults(opts, prefix: prefix, name: name, version: version)
-
-        :opentelemetry.register_tracer(name, version)
 
         :telemetry.attach_many(
           {name, __MODULE__},
