@@ -1,4 +1,4 @@
- defmodule MvOpentelemetry.LiveViewTest do
+defmodule MvOpentelemetry.LiveViewTest do
   use MvOpentelemetry.OpenTelemetryCase
   import Phoenix.LiveViewTest
 
