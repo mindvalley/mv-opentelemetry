@@ -3,8 +3,6 @@ defmodule MvOpentelemetry.Plug do
 
   alias OpenTelemetry.Span
 
-  @tracer_id __MODULE__
-
   @spec register_tracer(opts :: Access.t()) :: :ok
   def register_tracer(opts) do
     opts = handle_opts(opts)
@@ -31,7 +29,7 @@ defmodule MvOpentelemetry.Plug do
   defp handle_opts(opts) do
     span_prefix = opts[:span_prefix] || [:phoenix, :endpoint]
     name_prefix = opts[:name_prefix] || span_prefix
-    tracer_id = opts[:tracer_id] || @tracer_id
+    tracer_id = opts[:tracer_id] || :mv_opentelemetry
     tracer_version = opts[:tracer_version] || MvOpentelemetry.version()
 
     [
