@@ -2,7 +2,7 @@ defmodule MvOpentelemetry.Absinthe do
   @moduledoc false
 
   use MvOpentelemetry.SpanTracer,
-    name: :absinthe,
+    name: :graphql,
     events: [
       [:absinthe, :execute, :operation, :start],
       [:absinthe, :execute, :operation, :stop],
@@ -12,6 +12,7 @@ defmodule MvOpentelemetry.Absinthe do
       [:absinthe, :resolve, :field, :exception]
     ]
 
+  @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
   def handle_event([:absinthe, :resolve, :field, :start], _measurements, meta, opts) do
     event_name = [opts[:prefix]] ++ [:resolve, :field]
 
