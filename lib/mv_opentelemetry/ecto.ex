@@ -5,8 +5,6 @@ defmodule MvOpentelemetry.Ecto do
   alias OpenTelemetry.Span
   alias OpenTelemetry.Tracer
 
-  @tracer_id __MODULE__
-
   @time_attributes [:decode_time, :query_time, :queue_time]
 
   @spec register_tracer(Access.t()) :: :ok | {:error, :already_exists}
@@ -27,16 +25,9 @@ defmodule MvOpentelemetry.Ecto do
       opts[:span_prefix] ||
         raise MvOpentelemetry.Error, message: "span_prefix is required", module: __MODULE__
 
-    name_prefix = opts[:name_prefix] || span_prefix
-    tracer_id = opts[:tracer_id] || @tracer_id
-    tracer_version = opts[:tracer_version] || MvOpentelemetry.version()
+    tracer_id = :mv_opentelemetry
 
-    [
-      span_prefix: span_prefix,
-      name_prefix: name_prefix,
-      tracer_id: tracer_id,
-      tracer_version: tracer_version
-    ]
+    [span_prefix: span_prefix, tracer_id: tracer_id]
   end
 
   @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
@@ -75,18 +66,32 @@ defmodule MvOpentelemetry.Ecto do
     ]
 
     all_attributes = result ++ base_attributes ++ time_attributes(measurements)
-
     span_name = name(config, event, source)
-    span_opts = %{start_time: start_time, attributes: all_attributes}
+    span_opts = %{start_time: start_time, attributes: all_attributes, kind: :client}
 
-    Tracer.start_span(span_name, span_opts)
-    |> Span.end_span()
+    span = Tracer.start_span(span_name, span_opts)
+
+    case query_result do
+      {:error, error} ->
+        OpenTelemetry.Span.set_status(span, OpenTelemetry.status(:error, format_error(error)))
+
+      {:ok, _} ->
+        :ok
+    end
+
+    Span.end_span(span)
 
     :ok
   end
 
+  defp format_error(%{__exception__: true} = exception) do
+    Exception.message(exception)
+  end
+
+  defp format_error(_), do: ""
+
   defp name(config, event, source) do
-    prefix = config[:name_prefix] || event
+    prefix = config[:span_prefix] || event
 
     complete_name =
       case source do
