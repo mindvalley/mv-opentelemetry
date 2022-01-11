@@ -7,11 +7,10 @@ defmodule MvOpentelemetry.Plug do
   def register_tracer(opts) do
     opts = handle_opts(opts)
     prefix = opts[:span_prefix]
-    tracer_id = opts[:tracer_id]
 
     :ok =
       :telemetry.attach(
-        {tracer_id, __MODULE__, :handle_start_event},
+        {prefix, __MODULE__, :handle_start_event},
         prefix ++ [:start],
         &__MODULE__.handle_start_event/4,
         opts
@@ -19,7 +18,7 @@ defmodule MvOpentelemetry.Plug do
 
     :ok =
       :telemetry.attach(
-        {tracer_id, __MODULE__, :handle_stop_event},
+        {prefix, __MODULE__, :handle_stop_event},
         prefix ++ [:stop],
         &__MODULE__.handle_stop_event/4,
         opts
@@ -28,16 +27,9 @@ defmodule MvOpentelemetry.Plug do
 
   defp handle_opts(opts) do
     span_prefix = opts[:span_prefix] || [:phoenix, :endpoint]
-    name_prefix = opts[:name_prefix] || span_prefix
-    tracer_id = opts[:tracer_id] || :mv_opentelemetry
-    tracer_version = opts[:tracer_version] || MvOpentelemetry.version()
+    tracer_id = :mv_opentelemetry
 
-    [
-      span_prefix: span_prefix,
-      name_prefix: name_prefix,
-      tracer_id: tracer_id,
-      tracer_version: tracer_version
-    ]
+    [span_prefix: span_prefix, tracer_id: tracer_id]
   end
 
   @spec handle_start_event(_ :: any(), _ :: any(), %{conn: Plug.Conn.t()}, Access.t()) :: :ok
@@ -46,6 +38,8 @@ defmodule MvOpentelemetry.Plug do
 
     request_id = :proplists.get_value("x-request-id", conn.resp_headers, "")
     user_agent = :proplists.get_value("user-agent", conn.req_headers, "")
+    peer_data = Plug.Conn.get_peer_data(conn)
+    peer_ip = Map.get(peer_data, :address)
     referer = :proplists.get_value("referer", conn.req_headers, "")
     client_ip = client_ip(conn)
 
@@ -54,10 +48,16 @@ defmodule MvOpentelemetry.Plug do
       {"http.host", conn.host},
       {"http.method", conn.method},
       {"http.scheme", "#{conn.scheme}"},
-      {"http.request_path", conn.request_path},
+      {"http.target", conn.request_path},
       {"http.request_id", request_id},
       {"http.user_agent", user_agent},
-      {"http.referer", referer}
+      {"http.referer", referer},
+      {"http.flavor", http_flavor(conn.adapter)},
+      {"net.host.ip", to_string(:inet_parse.ntoa(conn.remote_ip))},
+      {"net.host.port", conn.port},
+      {"net.peer.ip", to_string(:inet_parse.ntoa(peer_ip))},
+      {"net.peer.port", peer_data.port},
+      {"net.transport", "IP.TCP"}
     ]
 
     query_attributes = Enum.map(conn.query_params, &prefix_key_with(&1, "http.query_params"))
@@ -65,7 +65,7 @@ defmodule MvOpentelemetry.Plug do
 
     attributes = attributes ++ query_attributes ++ path_attributes
 
-    event_name = (opts[:name_prefix] ++ [String.downcase(conn.method)]) |> Enum.join(".")
+    event_name = "HTTP #{conn.method}"
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
     |> Span.set_attributes(attributes)
@@ -100,6 +100,18 @@ defmodule MvOpentelemetry.Plug do
       |> List.first()
     else
       to_string(:inet.ntoa(conn.remote_ip))
+    end
+  end
+
+  defp http_flavor({_adapter_name, meta}) do
+    case Map.get(meta, :version) do
+      :"HTTP/1.0" -> "1.0"
+      :"HTTP/1.1" -> "1.1"
+      :"HTTP/2.0" -> "2.0"
+      :"HTTP/2" -> "2.0"
+      :SPDY -> "SPDY"
+      :QUIC -> "QUIC"
+      nil -> ""
     end
   end
 end

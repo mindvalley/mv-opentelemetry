@@ -80,10 +80,6 @@ defmodule MvOpentelemetry do
 
   ## Plug
     - `span_prefix` OPTIONAL telemetry prefix to listen to. Defaults to [:phoenix, :endpoint]
-    - `name_prefix` OPTIONAL telemetry prefix that will be emited in events, for example
-    [:my_app, :live_view]. Defaults to span_prefix.
-    - `tracer_id` OPTIONAL atom to identify tracers in case you want to listen to events from
-    Plug.Telemetry twice.
   """
   @spec register_tracer(:absinthe | :dataloader | :ecto | :plug | :live_view, Access.t()) :: :ok
   def register_tracer(:absinthe, opts), do: MvOpentelemetry.Absinthe.register_tracer(opts)
