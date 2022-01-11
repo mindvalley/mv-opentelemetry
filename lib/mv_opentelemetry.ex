@@ -63,8 +63,6 @@ defmodule MvOpentelemetry do
   ## Ecto
     - `span_prefix` REQUIRED telemetry prefix to listen to. If you're unsure of what to put here,
     [:my_app, :repo] is the right choice.
-    - `name_prefix` OPTIONAL telemetry prefix that will be emited in events, for example
-    [:my_app, :ecto]
 
   ## LiveView
     - `prefix` OPTIONAL telemetry prefix that will be emited in events, for example
