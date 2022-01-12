@@ -25,9 +25,7 @@ defmodule MvOpentelemetry.Ecto do
       opts[:span_prefix] ||
         raise MvOpentelemetry.Error, message: "span_prefix is required", module: __MODULE__
 
-    tracer_id = :mv_opentelemetry
-
-    [span_prefix: span_prefix, tracer_id: tracer_id]
+    [span_prefix: span_prefix]
   end
 
   @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
@@ -75,8 +73,8 @@ defmodule MvOpentelemetry.Ecto do
       {:error, error} ->
         OpenTelemetry.Span.set_status(span, OpenTelemetry.status(:error, format_error(error)))
 
-      {:ok, _} ->
-        :ok
+      _ ->
+        :noop
     end
 
     Span.end_span(span)
