@@ -6,7 +6,8 @@ defmodule MvOpentelemetry.EctoTest do
 
     MvOpentelemetry.Ecto.register_tracer(
       tracer_id: :test_ecto_tracer,
-      span_prefix: [:mv_opentelemetry_harness, :repo]
+      span_prefix: [:mv_opentelemetry_harness, :repo],
+      default_attributes: [{"service.component", "test.harness"}]
     )
 
     MvOpentelemetryHarness.Page.all() |> MvOpentelemetryHarness.Repo.all()
@@ -18,6 +19,7 @@ defmodule MvOpentelemetry.EctoTest do
 
     assert {"db.source", "pages"} in attributes
     assert {"db.type", :sql} in attributes
+    assert {"service.component", "test.harness"} in attributes
     assert "db.statement" in keys
     assert "db.instance" in keys
     assert "db.url" in keys

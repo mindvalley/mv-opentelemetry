@@ -95,6 +95,7 @@ defmodule MvOpentelemetry.SpanTracer do
     events = Access.fetch!(opts, :events)
     name = Access.get(opts, :name, __CALLER__.module)
     prefix = Access.get(opts, :prefix, name)
+    default_attributes = Access.get(opts, :default_attributes, [])
     tracer_version = Access.get(opts, :version, MvOpentelemetry.version())
 
     quote location: :keep do
@@ -110,10 +111,17 @@ defmodule MvOpentelemetry.SpanTracer do
         prefix = Access.get(opts, :prefix, unquote(prefix))
         name = Access.get(opts, :name, unquote(name))
         version = Access.get(opts, :version, unquote(tracer_version))
+        default_attributes = Access.get(opts, :default_attributes, unquote(default_attributes))
         tracer_id = :mv_opentelemetry
 
         opts_with_defaults =
-          merge_defaults(opts, prefix: prefix, name: name, version: version, tracer_id: tracer_id)
+          merge_defaults(opts,
+            prefix: prefix,
+            name: name,
+            version: version,
+            tracer_id: tracer_id,
+            default_attributes: default_attributes
+          )
 
         :telemetry.attach_many(
           {name, __MODULE__},
@@ -129,6 +137,7 @@ defmodule MvOpentelemetry.SpanTracer do
         |> merge_default(:prefix, defaults[:prefix])
         |> merge_default(:version, defaults[:version])
         |> merge_default(:tracer_id, defaults[:tracer_id])
+        |> merge_default(:default_attributes, defaults[:default_attributes])
       end
 
       def merge_default(opts, key, new_value) do

@@ -17,7 +17,11 @@ defmodule MvOpentelemetry.DataloaderTest do
 
   test "sends batch events", %{dataloader: loader} do
     :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-    MvOpentelemetry.Dataloader.register_tracer(name: :test_dataloader_tracer)
+
+    MvOpentelemetry.Dataloader.register_tracer(
+      name: :test_dataloader_tracer,
+      default_attributes: [{"service.component", "test.harness"}]
+    )
 
     page = %MvOpentelemetryHarness.Page{title: "page", body: "page"}
     _page = MvOpentelemetryHarness.Repo.insert!(page)
@@ -35,14 +39,18 @@ defmodule MvOpentelemetry.DataloaderTest do
     assert_receive {:span, span_record}
     assert "dataloader.source.batch.run" == span(span_record, :name)
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
-    assert attributes == %{}
+    assert attributes == %{"service.component" => "test.harness"}
 
     :ok = :telemetry.detach({:test_dataloader_tracer, MvOpentelemetry.Dataloader})
   end
 
   test "sends source events", %{dataloader: loader} do
     :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-    MvOpentelemetry.Dataloader.register_tracer(name: :test_dataloader_tracer)
+
+    MvOpentelemetry.Dataloader.register_tracer(
+      name: :test_dataloader_tracer,
+      default_attributes: [{"service.component", "test.harness"}]
+    )
 
     loader
     |> Dataloader.load_many(MvOpentelemetryHarness.Pet, MvOpentelemetryHarness.Pet, [1])
@@ -51,8 +59,7 @@ defmodule MvOpentelemetry.DataloaderTest do
     assert_receive {:span, span_record}
     assert "dataloader.source.run" == span(span_record, :name)
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
-
-    assert attributes == %{}
+    assert attributes == %{"service.component" => "test.harness"}
 
     :ok = :telemetry.detach({:test_dataloader_tracer, MvOpentelemetry.Dataloader})
   end

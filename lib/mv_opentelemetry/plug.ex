@@ -28,8 +28,9 @@ defmodule MvOpentelemetry.Plug do
   defp handle_opts(opts) do
     span_prefix = opts[:span_prefix] || [:phoenix, :endpoint]
     tracer_id = :mv_opentelemetry
+    default_attributes = opts[:default_attributes] || []
 
-    [span_prefix: span_prefix, tracer_id: tracer_id]
+    [span_prefix: span_prefix, tracer_id: tracer_id, default_attributes: default_attributes]
   end
 
   @spec handle_start_event(_ :: any(), _ :: any(), %{conn: Plug.Conn.t()}, Access.t()) :: :ok
@@ -63,7 +64,7 @@ defmodule MvOpentelemetry.Plug do
     query_attributes = Enum.map(conn.query_params, &prefix_key_with(&1, "http.query_params"))
     path_attributes = Enum.map(conn.path_params, &prefix_key_with(&1, "http.path_params"))
 
-    attributes = attributes ++ query_attributes ++ path_attributes
+    attributes = attributes ++ query_attributes ++ path_attributes ++ opts[:default_attributes]
 
     event_name = "HTTP #{conn.method}"
 

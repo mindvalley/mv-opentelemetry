@@ -25,7 +25,9 @@ defmodule MvOpentelemetry.Ecto do
       opts[:span_prefix] ||
         raise MvOpentelemetry.Error, message: "span_prefix is required", module: __MODULE__
 
-    [span_prefix: span_prefix]
+    default_attributes = opts[:default_attributes] || []
+
+    [span_prefix: span_prefix, default_attributes: default_attributes]
   end
 
   @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
@@ -63,7 +65,11 @@ defmodule MvOpentelemetry.Ecto do
       {"db.total_time_microseconds", convert_time(total_time)}
     ]
 
-    all_attributes = result ++ base_attributes ++ time_attributes(measurements)
+    default_attributes = config[:default_attributes]
+
+    all_attributes =
+      default_attributes ++ result ++ base_attributes ++ time_attributes(measurements)
+
     span_name = name(config, event, source)
     span_opts = %{start_time: start_time, attributes: all_attributes, kind: :client}
 
