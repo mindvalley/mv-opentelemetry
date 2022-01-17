@@ -25,22 +25,6 @@ defmodule MvOpentelemetry do
   ```
   """
 
-  @doc """
-  Convert a data structure into another one, that is safe to store in a tracing backend
-  and can be converted to JSON.
-
-  You can use this function to implement your own tracers. It is also used to sanitize
-  absinthe data.
-  """
-  @spec sanitize(MvOpentelemetry.Sanitizer.t()) :: {:error, Exception.t()} | term()
-  def sanitize(value), do: MvOpentelemetry.Sanitize.sanitize!(value)
-
-  @doc """
-  Same as sanitize/1, but raises on error.
-  """
-  @spec sanitize!(MvOpentelemetry.Sanitizer.t()) :: term()
-  def sanitize!(value), do: MvOpentelemetry.Sanitize.sanitize!(value)
-
   defmodule Error do
     defexception [:message, :module]
   end
