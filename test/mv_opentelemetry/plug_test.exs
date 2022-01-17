@@ -3,7 +3,11 @@ defmodule MvOpentelemetry.PlugTest do
 
   test "handles successful requests in stories-specific context", %{conn: conn} do
     :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-    MvOpentelemetry.Plug.register_tracer(span_prefix: [:harness, :request])
+
+    MvOpentelemetry.Plug.register_tracer(
+      span_prefix: [:harness, :request],
+      default_attributes: [{"service.component", "test.harness"}]
+    )
 
     conn
     |> put_req_header("user-agent", "Phoenix Test")
@@ -18,6 +22,7 @@ defmodule MvOpentelemetry.PlugTest do
     assert {"http.method", "GET"} in attributes
     assert {"http.flavor", ""} in attributes
     assert {"http.target", "/"} in attributes
+    assert {"service.component", "test.harness"} in attributes
     assert {"http.query_params.query", "1234"} in attributes
     assert {"http.query_params.user_id", ""} in attributes
     assert {"http.user_agent", "Phoenix Test"} in attributes

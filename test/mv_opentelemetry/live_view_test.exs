@@ -4,7 +4,11 @@ defmodule MvOpentelemetry.LiveViewTest do
 
   test "sends OpenTelemetry events to pid()", %{conn: conn} do
     :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-    MvOpentelemetry.LiveView.register_tracer(name: :test_live_view_tracer)
+
+    MvOpentelemetry.LiveView.register_tracer(
+      name: :test_live_view_tracer,
+      default_attributes: [{"potatoeh", "potatoe"}]
+    )
 
     assert {:ok, _view, html} = live(conn, "/live?live_id=11")
     assert html =~ "LiveLive"
@@ -13,6 +17,7 @@ defmodule MvOpentelemetry.LiveViewTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
+    assert {"potatoeh", "potatoe"} in attributes
     assert {"live_view.params.live_id", "11"} in attributes
 
     assert_receive {:span, span(name: "phoenix.live_view.handle_params") = span_record}
@@ -20,6 +25,7 @@ defmodule MvOpentelemetry.LiveViewTest do
 
     assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     assert {"live_view.params.live_id", "11"} in attributes
+    assert {"potatoeh", "potatoe"} in attributes
 
     :ok = :telemetry.detach({:test_live_view_tracer, MvOpentelemetry.LiveView})
   end

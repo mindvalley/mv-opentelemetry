@@ -3,7 +3,11 @@ defmodule MvOpentelemetry.AbsintheTest do
 
   test "sends otel events to pid", %{conn: conn} do
     :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-    MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_tracer)
+
+    MvOpentelemetry.Absinthe.register_tracer(
+      name: :test_absinthe_tracer,
+      default_attributes: [{"service.component", "test.harness"}]
+    )
 
     query = """
     query{
@@ -34,6 +38,7 @@ defmodule MvOpentelemetry.AbsintheTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert {"graphql.field.name", "human"} in attributes
+    assert {"service.component", "test.harness"} in attributes
     assert {"graphql.field.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
     assert_receive {:span, span_record}
@@ -41,6 +46,7 @@ defmodule MvOpentelemetry.AbsintheTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert {"graphql.field.name", "pets"} in attributes
+    assert {"service.component", "test.harness"} in attributes
     assert {"graphql.field.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
     :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})

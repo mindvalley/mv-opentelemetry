@@ -27,7 +27,7 @@ defmodule MvOpentelemetry.LiveView do
     attributes = [{"live_view.view", meta.socket.view}]
 
     params_attributes = Enum.map(meta.params, &prefix_key_with(&1, "live_view.params"))
-    attributes = attributes ++ params_attributes
+    attributes = attributes ++ params_attributes ++ opts[:default_attributes]
 
     name = get_name(event, opts)
 
@@ -46,7 +46,7 @@ defmodule MvOpentelemetry.LiveView do
     attributes = [{"live_view.view", meta.socket.view}, {"live_view.uri", meta.uri}]
 
     params_attributes = Enum.map(meta.params, &prefix_key_with(&1, "live_view.params"))
-    attributes = attributes ++ params_attributes
+    attributes = attributes ++ params_attributes ++ opts[:default_attributes]
 
     name = get_name(event, opts)
 
@@ -71,7 +71,7 @@ defmodule MvOpentelemetry.LiveView do
     name = get_name(event, opts)
 
     params_attributes = Enum.map(meta.params, &prefix_key_with(&1, "live_view.params"))
-    attributes = attributes ++ params_attributes
+    attributes = attributes ++ params_attributes ++ opts[:default_attributes]
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], name, meta, %{})
     |> Span.set_attributes(attributes)
@@ -94,6 +94,8 @@ defmodule MvOpentelemetry.LiveView do
     ]
 
     name = get_name(event, opts)
+
+    attributes = attributes ++ opts[:default_attributes]
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], name, meta, %{})
     |> Span.set_attributes(attributes)

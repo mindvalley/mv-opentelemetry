@@ -34,6 +34,8 @@ defmodule MvOpentelemetry.Absinthe do
       {"graphql.field.schema", resolution.schema}
     ]
 
+    attributes = attributes ++ opts[:default_attributes]
+
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
     |> Span.set_attributes(attributes)
 
@@ -43,7 +45,7 @@ defmodule MvOpentelemetry.Absinthe do
   def handle_event([:absinthe, :execute, :operation, :start], _measurements, meta, opts) do
     event_name = Enum.join([opts[:prefix]] ++ [:execute, :operation], ".")
 
-    attributes = [{"graphql.operation.input", meta.blueprint.input}]
+    attributes = [{"graphql.operation.input", meta.blueprint.input}] ++ opts[:default_attributes]
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
     |> Span.set_attributes(attributes)

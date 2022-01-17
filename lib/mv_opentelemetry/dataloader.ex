@@ -10,9 +10,11 @@ defmodule MvOpentelemetry.Dataloader do
     ]
 
   @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
-  def handle_event([:dataloader, :source, :run, :start], _measurements, meta, _opts) do
+  def handle_event([:dataloader, :source, :run, :start], _measurements, meta, opts) do
     event_name = "dataloader.source.run"
+
     OpentelemetryTelemetry.start_telemetry_span(__MODULE__, event_name, meta, %{})
+    |> Span.set_attributes(opts[:default_attributes])
 
     :ok
   end
@@ -22,9 +24,11 @@ defmodule MvOpentelemetry.Dataloader do
     :ok
   end
 
-  def handle_event([:dataloader, :source, :batch, :run, :start], _measurements, meta, _opts) do
+  def handle_event([:dataloader, :source, :batch, :run, :start], _measurements, meta, opts) do
     event_name = "dataloader.source.batch.run"
+
     OpentelemetryTelemetry.start_telemetry_span(__MODULE__, event_name, meta, %{})
+    |> Span.set_attributes(opts[:default_attributes])
 
     :ok
   end

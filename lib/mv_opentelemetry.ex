@@ -18,10 +18,6 @@ defmodule MvOpentelemetry do
     :ok = MvOpentelemetry.register_tracer(:live_view)
   end
 
-  ## Note about Absinthe tracers
-
-  In case your application uses Absinthe to implement GraphQL and you return structs from your
-  resolvers, ensure that each of the structs implements the MvOpentelemetry.Sanitizer protocol.
   ```
   """
 
@@ -47,21 +43,31 @@ defmodule MvOpentelemetry do
   ## Ecto
     - `span_prefix` REQUIRED telemetry prefix to listen to. If you're unsure of what to put here,
     [:my_app, :repo] is the right choice.
+    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
+      from this group, for example [{"service.component", "my_app"}]. Defaults to []
 
   ## LiveView
     - `prefix` OPTIONAL telemetry prefix that will be emited in events, for example
     "my_app.phoenix". Defaults to "phoenix"
     - `name` OPTIONAL atom to identify tracers in case you want to listen to events from
     live_view twice.
+    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
+      from this group, for example [{"service.component", "my_app"}]. Defaults to []
 
   ## Absinthe
-    - `prefix` OPTIONAL telemetry prefix that will be emited in events, defaults to "absinthe"
+    - `prefix` OPTIONAL telemetry prefix that will be emited in events, defaults to "graphql"
+    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
+      from this group, for example [{"service.component", "ecto"}]. Defaults to []
 
   ## Dataloader
-  Accepts no arguments.
+    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
+      from this group, for example [{"service.component", "ecto"}]. Defaults to []
 
   ## Plug
     - `span_prefix` OPTIONAL telemetry prefix to listen to. Defaults to [:phoenix, :endpoint]
+    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
+      from this group, for example [{"service.component", "ecto"}]. Defaults to []
+
   """
   @spec register_tracer(:absinthe | :dataloader | :ecto | :plug | :live_view, Access.t()) :: :ok
   def register_tracer(:absinthe, opts), do: MvOpentelemetry.Absinthe.register_tracer(opts)
