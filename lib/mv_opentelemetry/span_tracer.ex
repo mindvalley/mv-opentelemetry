@@ -54,7 +54,7 @@ defmodule MvOpentelemetry.SpanTracer do
   `c:handle_event/4` callback as config (4th argument).
 
   ```
-  [version: "0.1.0", prefix: MyApp.SpanTracer, name: MyApp.SpanTracer]
+  [prefix: MyApp.SpanTracer, name: MyApp.SpanTracer]
   ```
 
   If you want to, you can also completely override the `c:register_tracer/1` callback.
@@ -69,14 +69,13 @@ defmodule MvOpentelemetry.SpanTracer do
   needed.
   * `:prefix` - atom or string that can be used generate span name. Defaults to current module
   name.
-  * `version` - string to version the tracer within OpenTelemetry. Defaults to "0.1.0"
 
   All optional parameters can be also provided in `c:register_tracer/1` call site:
 
   ```
   def MyApp do
     def start(_type, _args) do
-      MyApp.SpanTracer.register_tracer(name: :test_span, version: "0.2.0", prefix: "other_tracer")
+      MyApp.SpanTracer.register_tracer(name: :test_span, prefix: "other_tracer")
     end
   end
   ```
@@ -96,7 +95,6 @@ defmodule MvOpentelemetry.SpanTracer do
     name = Access.get(opts, :name, __CALLER__.module)
     prefix = Access.get(opts, :prefix, name)
     default_attributes = Access.get(opts, :default_attributes, [])
-    tracer_version = Access.get(opts, :version, MvOpentelemetry.version())
 
     quote location: :keep do
       @behaviour MvOpentelemetry.SpanTracer
@@ -110,7 +108,6 @@ defmodule MvOpentelemetry.SpanTracer do
       def register_tracer(opts \\ []) do
         prefix = Access.get(opts, :prefix, unquote(prefix))
         name = Access.get(opts, :name, unquote(name))
-        version = Access.get(opts, :version, unquote(tracer_version))
         default_attributes = Access.get(opts, :default_attributes, unquote(default_attributes))
         tracer_id = :mv_opentelemetry
 
@@ -118,7 +115,6 @@ defmodule MvOpentelemetry.SpanTracer do
           merge_defaults(opts,
             prefix: prefix,
             name: name,
-            version: version,
             tracer_id: tracer_id,
             default_attributes: default_attributes
           )
@@ -135,7 +131,6 @@ defmodule MvOpentelemetry.SpanTracer do
         opts
         |> merge_default(:name, defaults[:name])
         |> merge_default(:prefix, defaults[:prefix])
-        |> merge_default(:version, defaults[:version])
         |> merge_default(:tracer_id, defaults[:tracer_id])
         |> merge_default(:default_attributes, defaults[:default_attributes])
       end
