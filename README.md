@@ -32,8 +32,8 @@ which can send data to any OTLP enabled collector.
 ```elixir
 def deps do
   [
-    {:mv_opentelemetry, git: "git@github.com:mindvalley/mv-opentelemetry.git"},
-    {:opentelemetry_exporter, "~> 1.0.0-rc.3"},
+    {:mv_opentelemetry, github: "mindvalley/mv-opentelemetry", tag: "v1.0.0"},
+    {:opentelemetry_exporter, "~> 1.0.0"},
   ]
 end
 ```
