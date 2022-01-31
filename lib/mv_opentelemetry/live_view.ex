@@ -26,7 +26,11 @@ defmodule MvOpentelemetry.LiveView do
   def handle_event([:phoenix, :live_view, :mount, :start] = event, _measurements, meta, opts) do
     attributes = [{"live_view.view", meta.socket.view}]
 
-    params_attributes = Enum.map(meta.params, &prefix_key_with(&1, "live_view.params"))
+    params_attributes =
+      meta.params
+      |> filter_list(opts[:query_params_whitelist])
+      |> Enum.map(&prefix_key_with(&1, "live_view.params"))
+
     attributes = attributes ++ params_attributes ++ opts[:default_attributes]
 
     name = get_name(event, opts)
@@ -45,7 +49,11 @@ defmodule MvOpentelemetry.LiveView do
       ) do
     attributes = [{"live_view.view", meta.socket.view}, {"live_view.uri", meta.uri}]
 
-    params_attributes = Enum.map(meta.params, &prefix_key_with(&1, "live_view.params"))
+    params_attributes =
+      meta.params
+      |> filter_list(opts[:query_params_whitelist])
+      |> Enum.map(&prefix_key_with(&1, "live_view.params"))
+
     attributes = attributes ++ params_attributes ++ opts[:default_attributes]
 
     name = get_name(event, opts)
@@ -70,7 +78,11 @@ defmodule MvOpentelemetry.LiveView do
 
     name = get_name(event, opts)
 
-    params_attributes = Enum.map(meta.params, &prefix_key_with(&1, "live_view.params"))
+    params_attributes =
+      meta.params
+      |> filter_list(opts[:query_params_whitelist])
+      |> Enum.map(&prefix_key_with(&1, "live_view.params"))
+
     attributes = attributes ++ params_attributes ++ opts[:default_attributes]
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], name, meta, %{})
@@ -137,6 +149,12 @@ defmodule MvOpentelemetry.LiveView do
     _ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
     :ok
+  end
+
+  defp filter_list(params, nil), do: params
+
+  defp filter_list(params, whitelist) do
+    Enum.filter(params, fn {k, _v} -> Enum.member?(whitelist, k) end)
   end
 
   defp prefix_key_with({key, value}, prefix) when is_binary(key) do

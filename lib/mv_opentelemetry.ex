@@ -33,7 +33,7 @@ defmodule MvOpentelemetry do
   def register_tracer(atom), do: register_tracer(atom, [])
 
   @doc false
-  def version, do: "1.0.0"
+  def version, do: "1.1.0"
 
   @doc """
   Registers tracer for given functional area with options.
@@ -53,6 +53,8 @@ defmodule MvOpentelemetry do
     live_view twice.
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
       from this group, for example [{"service.component", "my_app"}]. Defaults to []
+    - `query_params_whitelist` OPTIONAL list of query param names you want to allow to log in your
+      traces, i.e ["user_id", "product_id"]. Defaults to logging all.
 
   ## Absinthe
     - `prefix` OPTIONAL telemetry prefix that will be emited in events, defaults to "graphql"
@@ -67,6 +69,8 @@ defmodule MvOpentelemetry do
     - `span_prefix` OPTIONAL telemetry prefix to listen to. Defaults to [:phoenix, :endpoint]
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
       from this group, for example [{"service.component", "ecto"}]. Defaults to []
+    - `query_params_whitelist` OPTIONAL list of query param names you want to allow to log in your
+      traces, i.e ["user_id", "product_id"]. Defaults to logging all.
 
   """
   @spec register_tracer(:absinthe | :dataloader | :ecto | :plug | :live_view, Access.t()) :: :ok
