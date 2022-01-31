@@ -36,4 +36,41 @@ defmodule MvOpentelemetry.PlugTest do
     :ok = :telemetry.detach({[:harness, :request], MvOpentelemetry.Plug, :handle_start_event})
     :ok = :telemetry.detach({[:harness, :request], MvOpentelemetry.Plug, :handle_stop_event})
   end
+
+  test "allows for setting query params whitelist", %{conn: conn} do
+    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
+
+    MvOpentelemetry.Plug.register_tracer(
+      span_prefix: [:harness, :request],
+      query_params_whitelist: ["user_id"],
+      default_attributes: [{"service.component", "test.harness"}]
+    )
+
+    conn
+    |> put_req_header("user-agent", "Phoenix Test")
+    |> put_req_header("referer", "http://localhost")
+    |> get("/?query=1234&user_id=1233", %{})
+
+    assert_receive {:span, span(name: "HTTP GET") = span_record}
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+    keys = Enum.map(attributes, fn {k, _v} -> k end)
+
+    assert {"http.status", 200} in attributes
+    assert {"http.method", "GET"} in attributes
+    assert {"http.flavor", ""} in attributes
+    assert {"http.target", "/"} in attributes
+    assert {"service.component", "test.harness"} in attributes
+    refute {"http.query_params.query", "1234"} in attributes
+    assert {"http.query_params.user_id", "1233"} in attributes
+    assert {"http.user_agent", "Phoenix Test"} in attributes
+    assert {"http.referer", "http://localhost"} in attributes
+    assert {"net.transport", "IP.TCP"} in attributes
+    assert "http.request_id" in keys
+    assert "http.client_ip" in keys
+    assert "net.peer.ip" in keys
+    assert "net.peer.port" in keys
+
+    :ok = :telemetry.detach({[:harness, :request], MvOpentelemetry.Plug, :handle_start_event})
+    :ok = :telemetry.detach({[:harness, :request], MvOpentelemetry.Plug, :handle_stop_event})
+  end
 end
