@@ -33,7 +33,7 @@ defmodule MvOpentelemetry do
   def register_tracer(atom), do: register_tracer(atom, [])
 
   @doc false
-  def version, do: "1.1.0"
+  def version, do: "1.1.1"
 
   @doc """
   Registers tracer for given functional area with options.
