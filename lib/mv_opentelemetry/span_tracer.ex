@@ -127,6 +127,10 @@ defmodule MvOpentelemetry.SpanTracer do
         )
       end
 
+      defp __opts__ do
+        unquote(opts)
+      end
+
       defp merge_defaults(opts, defaults) do
         opts
         |> merge_default(:name, defaults[:name])

@@ -4,7 +4,7 @@ defmodule MvOpentelemetry.MixProject do
   def project do
     [
       app: :mv_opentelemetry,
-      version: "1.1.1",
+      version: "1.2.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),

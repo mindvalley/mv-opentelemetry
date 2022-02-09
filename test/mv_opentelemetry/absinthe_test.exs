@@ -1,12 +1,13 @@
 defmodule MvOpentelemetry.AbsintheTest do
   use MvOpentelemetry.OpenTelemetryCase
 
-  test "sends otel events to pid", %{conn: conn} do
+  test "sends field events when asked for it", %{conn: conn} do
     :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
 
     MvOpentelemetry.Absinthe.register_tracer(
       name: :test_absinthe_tracer,
-      default_attributes: [{"service.component", "test.harness"}]
+      default_attributes: [{"service.component", "test.harness"}],
+      include_field_resolution: true
     )
 
     query = """
@@ -48,6 +49,45 @@ defmodule MvOpentelemetry.AbsintheTest do
     assert {"graphql.field.name", "pets"} in attributes
     assert {"service.component", "test.harness"} in attributes
     assert {"graphql.field.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
+
+    :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
+  end
+
+  test "sends only top-level events", %{conn: conn} do
+    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
+
+    MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_tracer)
+
+    query = """
+    query{
+      human(id: "foo"){
+        name
+        id,
+        pets{
+          name
+        }
+      }
+    }
+    """
+
+    conn = post(conn, "/graphql", %{"query" => query})
+
+    assert json_response(conn, 200) == %{
+             "data" => %{
+               "human" => %{
+                 "id" => "foo",
+                 "name" => "Stephen",
+                 "pets" => [%{"name" => "Pinky"}, %{"name" => "Brain"}]
+               }
+             }
+           }
+
+    assert_receive {:span, span_record}
+    assert "graphql.execute.operation" == span(span_record, :name)
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+
+    assert {"graphql.operation.input", query} in attributes
+    assert {"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
     :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
   end
