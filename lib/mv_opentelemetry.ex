@@ -32,9 +32,6 @@ defmodule MvOpentelemetry do
   @spec register_tracer(:ecto | :plug | :live_view | :absinthe | :dataloader) :: :ok
   def register_tracer(atom), do: register_tracer(atom, [])
 
-  @doc false
-  def version, do: "1.1.1"
-
   @doc """
   Registers tracer for given functional area with options.
   Allowed areas are: :absinthe, :dataloader, :ecto, :phoenix and :live_view.
@@ -60,6 +57,8 @@ defmodule MvOpentelemetry do
     - `prefix` OPTIONAL telemetry prefix that will be emited in events, defaults to "graphql"
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
       from this group, for example [{"service.component", "ecto"}]. Defaults to []
+    - `include_field_resolution` OPTIONAL boolean for subscribing to field resolution events.
+      These tend to be noisy and produce a lot of spans, so the default is set to `false`
 
   ## Dataloader
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
