@@ -4,7 +4,7 @@ defmodule MvOpentelemetry.MixProject do
   def project do
     [
       app: :mv_opentelemetry,
-      version: "1.2.0",
+      version: "1.2.1",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -45,6 +45,7 @@ defmodule MvOpentelemetry.MixProject do
       {:opentelemetry_exporter, "~> 1.0", only: [:dev, :test]},
       {:mv_opentelemetry_harness, path: "./mv_opentelemetry_harness", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:plug, "~> 1.0", optional: true},
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false}

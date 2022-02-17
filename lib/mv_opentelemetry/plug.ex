@@ -45,7 +45,14 @@ defmodule MvOpentelemetry.Plug do
 
     request_id = :proplists.get_value("x-request-id", conn.resp_headers, "")
     user_agent = :proplists.get_value("user-agent", conn.req_headers, "")
-    peer_data = Plug.Conn.get_peer_data(conn)
+
+    peer_data =
+      if function_exported?(Plug.Conn, :get_peer_data, 1) do
+        Plug.Conn.get_peer_data(conn)
+      else
+        %{}
+      end
+
     peer_ip = Map.get(peer_data, :address)
     referer = :proplists.get_value("referer", conn.req_headers, "")
     client_ip = client_ip(conn)
