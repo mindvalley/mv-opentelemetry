@@ -23,6 +23,7 @@ def start(_type, _args) do
 end
 ```
 
+
 ## Installation
 
 The package can be installed by adding `mv_opentelemetry` to your list of
