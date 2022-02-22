@@ -28,7 +28,7 @@ pipeline {
                 ])
                 {
                     script {
-                        docker.image('${CircleCiDockerImage}').inside("--name ${CircleciContainerName}") {
+                        docker.image("${CircleCiDockerImage}").inside("--name ${CircleciContainerName}") {
                             sh '''
                             mix local.hex --force
                             mix local.rebar --force
@@ -43,7 +43,7 @@ pipeline {
         stage('Run pre-checks') {
             steps {
                 script {
-                    docker.image('${CircleCiDockerImage}').inside("--name ${CircleciContainerName}") {
+                    docker.image("${CircleCiDockerImage}").inside("--name ${CircleciContainerName}") {
                         sh '''
                         mix local.hex --force
                         mix local.rebar --force
@@ -86,7 +86,7 @@ pipeline {
                           '''
                         }
 
-                        docker.image('${CircleCiDockerImage}').inside("--name ${CCI_CLIENT} --network ${SIDECAR_NETWORK}") {
+                        docker.image("${CircleCiDockerImage}").inside("--name ${CCI_CLIENT} --network ${SIDECAR_NETWORK}") {
                             sh '''
                                 sudo apt-get update
                                 sudo apt-get install -y postgresql-client
