@@ -22,19 +22,15 @@ pipeline {
     stages {
         stage('Install dependencies') {
             steps {
-                cache(maxCacheSize: 500, caches: [
-                    [$class: 'ArbitraryFileCache', excludes: '', includes: '**/*', path: '${WORKSPACE}/deps'],
-                    [$class: 'ArbitraryFileCache', excludes: '', includes: '**/*', path: '${WORKSPACE}/.npm']
-                ])
-                {
-                    script {
-                        docker.image("${CircleCiDockerImage}").inside("--name ${CircleciContainerName}") {
-                            sh '''
-                            mix local.hex --force
-                            mix local.rebar --force
-                            mix do deps.get
-                            '''
-                        }
+                script {
+                    docker.image("${CircleCiDockerImage}").inside("--name ${CircleciContainerName}") {
+                        sh '''
+                        (test -f SHASUMS && shasum -c SHASUMS) || git clean -fdx
+                        mix local.hex --force
+                        mix local.rebar --force
+                        (test -f SHASUMS && shasum -c SHASUMS) || mix do deps.get
+                        shasum mix.lock > SHASUMS
+                        '''
                     }
                 }
             }
