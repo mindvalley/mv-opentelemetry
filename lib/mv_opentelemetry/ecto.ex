@@ -73,6 +73,12 @@ defmodule MvOpentelemetry.Ecto do
     span_name = name(config, event, source)
     span_opts = %{start_time: start_time, attributes: all_attributes, kind: :client}
 
+    parent_context = OpentelemetryProcessPropagator.fetch_parent_ctx(1, :"$callers")
+
+    if parent_context != :undefined do
+      OpenTelemetry.Ctx.attach(parent_context)
+    end
+
     span = Tracer.start_span(span_name, span_opts)
 
     case query_result do
@@ -84,6 +90,10 @@ defmodule MvOpentelemetry.Ecto do
     end
 
     Span.end_span(span)
+
+    if parent_context != :undefined do
+      OpenTelemetry.Ctx.detach(parent_context)
+    end
 
     :ok
   end
