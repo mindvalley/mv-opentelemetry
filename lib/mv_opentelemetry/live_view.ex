@@ -27,7 +27,8 @@ defmodule MvOpentelemetry.LiveView do
     attributes = [{"live_view.view", meta.socket.view}]
 
     params_attributes =
-      meta.params
+      meta
+      |> get_params()
       |> filter_list(opts[:query_params_whitelist])
       |> Enum.map(&prefix_key_with(&1, "live_view.params"))
 
@@ -50,7 +51,8 @@ defmodule MvOpentelemetry.LiveView do
     attributes = [{"live_view.view", meta.socket.view}, {"live_view.uri", meta.uri}]
 
     params_attributes =
-      meta.params
+      meta
+      |> get_params()
       |> filter_list(opts[:query_params_whitelist])
       |> Enum.map(&prefix_key_with(&1, "live_view.params"))
 
@@ -79,7 +81,8 @@ defmodule MvOpentelemetry.LiveView do
     name = get_name(event, opts)
 
     params_attributes =
-      meta.params
+      meta
+      |> get_params()
       |> filter_list(opts[:query_params_whitelist])
       |> Enum.map(&prefix_key_with(&1, "live_view.params"))
 
@@ -161,4 +164,7 @@ defmodule MvOpentelemetry.LiveView do
     complete_key = prefix <> "." <> key
     {complete_key, value}
   end
+
+  defp get_params(%{params: params}) when is_map(params), do: params
+  defp get_params(_), do: %{}
 end
