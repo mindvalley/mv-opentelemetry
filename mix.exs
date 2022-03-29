@@ -39,6 +39,7 @@ defmodule MvOpentelemetry.MixProject do
       # OpenTelemetry
       {:opentelemetry_telemetry, "~> 1.0.0-beta.2"},
       {:opentelemetry_api, "~> 1.0", override: true},
+      {:opentelemetry_process_propagator, "~> 0.1.1"},
 
       # Test and development harness
       {:opentelemetry, "~> 1.0", only: [:dev, :test]},
