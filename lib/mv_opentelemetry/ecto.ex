@@ -74,10 +74,7 @@ defmodule MvOpentelemetry.Ecto do
     span_opts = %{start_time: start_time, attributes: all_attributes, kind: :client}
 
     parent_context = OpentelemetryProcessPropagator.fetch_parent_ctx(1, :"$callers")
-
-    if parent_context != :undefined do
-      OpenTelemetry.Ctx.attach(parent_context)
-    end
+    attach_context(parent_context)
 
     span = Tracer.start_span(span_name, span_opts)
 
@@ -90,10 +87,7 @@ defmodule MvOpentelemetry.Ecto do
     end
 
     Span.end_span(span)
-
-    if parent_context != :undefined do
-      OpenTelemetry.Ctx.detach(parent_context)
-    end
+    detach_context(parent_context)
 
     :ok
   end
@@ -127,6 +121,12 @@ defmodule MvOpentelemetry.Ecto do
   defp time_key(atom) when atom in @time_attributes do
     String.to_atom("db.#{atom}_microseconds")
   end
+
+  defp attach_context(:undefined), do: :ok
+  defp attach_context(context), do: OpenTelemetry.Ctx.attach(context)
+
+  defp detach_context(:undefined), do: :ok
+  defp detach_context(context), do: OpenTelemetry.Ctx.detach(context)
 
   defp convert_time(time), do: System.convert_time_unit(time, :native, :microsecond)
 end
