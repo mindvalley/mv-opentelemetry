@@ -37,6 +37,31 @@ defmodule MvOpentelemetry.PlugTest do
     :ok = :telemetry.detach({[:harness, :request], MvOpentelemetry.Plug, :handle_stop_event})
   end
 
+  test "allows for setting a force trace header", %{conn: conn} do
+    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
+
+    MvOpentelemetry.Plug.register_tracer(span_prefix: [:harness, :request])
+
+    conn
+    |> put_req_header("x-force-trace", "true")
+    |> get("/", %{})
+
+    assert_receive {:span, span(name: "HTTP GET") = span_record}
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+    assert {"force_trace", true} in attributes
+
+    conn
+    |> put_req_header("x-force-trace", "anything else")
+    |> get("/", %{})
+
+    assert_receive {:span, span(name: "HTTP GET") = span_record}
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+    refute {"force_trace", true} in attributes
+
+    :ok = :telemetry.detach({[:harness, :request], MvOpentelemetry.Plug, :handle_start_event})
+    :ok = :telemetry.detach({[:harness, :request], MvOpentelemetry.Plug, :handle_stop_event})
+  end
+
   test "allows for setting query params whitelist", %{conn: conn} do
     :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
 
