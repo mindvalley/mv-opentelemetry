@@ -45,6 +45,14 @@ defmodule MvOpentelemetry.Plug do
 
     request_id = :proplists.get_value("x-request-id", conn.resp_headers, "")
     user_agent = :proplists.get_value("user-agent", conn.req_headers, "")
+    force_trace = :proplists.get_value("x-force-trace", conn.req_headers, false)
+
+    force_trace_attrs =
+      if force_trace == "true" do
+        [{"force_trace", true}]
+      else
+        []
+      end
 
     peer_data =
       if function_exported?(Plug.Conn, :get_peer_data, 1) do
@@ -81,7 +89,9 @@ defmodule MvOpentelemetry.Plug do
 
     path_attributes = Enum.map(conn.path_params, &prefix_key_with(&1, "http.path_params"))
 
-    attributes = attributes ++ query_attributes ++ path_attributes ++ opts[:default_attributes]
+    attributes =
+      attributes ++
+        force_trace_attrs ++ query_attributes ++ path_attributes ++ opts[:default_attributes]
 
     event_name = "HTTP #{conn.method}"
 
