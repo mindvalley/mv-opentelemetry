@@ -48,7 +48,7 @@ defmodule MvOpentelemetry.LiveView do
         meta,
         opts
       ) do
-    attributes = [{"live_view.view", meta.socket.view}, {"live_view.uri", meta.uri}]
+    attributes = [{"live_view.view", meta.socket.view}, {"live_view.uri", meta[:uri]}]
 
     params_attributes =
       meta
@@ -74,7 +74,7 @@ defmodule MvOpentelemetry.LiveView do
       ) do
     attributes = [
       {"live_view.view", meta.socket.view},
-      {"live_view.uri", meta.uri},
+      {"live_view.uri", meta[:uri]},
       {"live_view.event", meta.event}
     ]
 
@@ -105,7 +105,7 @@ defmodule MvOpentelemetry.LiveView do
       {"live_component.event", meta.event},
       {"live_component.component", meta.component},
       {"live_component.host_uri", meta.socket.host_uri},
-      {"live_component.uri", meta.uri}
+      {"live_component.uri", meta[:uri]}
     ]
 
     name = get_name(event, opts)
