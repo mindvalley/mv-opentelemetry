@@ -1,129 +1,96 @@
 pipeline {
     agent {
-        label 'jenkins-slave'
+      kubernetes {
+        defaultContainer 'jnlp'
+        yamlFile 'jenkins/k8s-ci-pod.yaml'
+      }
     }
     options {
-        disableConcurrentBuilds()
+      disableConcurrentBuilds()
+      skipStagesAfterUnstable()
     }
     environment {
-        SlackChannel = '#jenkins-ci-mv-opentelemetry'
-        APP_NAME = 'mv-opentelemetry'
-        MIX_ENV = 'test'
-        POSTGRES_USER = 'ubuntu'
-        POSTGRES_PASSWORD = 'ubuntupassword'
-        POSTGRES_HOST = "${APP_NAME}_postgreSQL_${NODE_NAME}_${BUILD_NUMBER}"
-        POSTGRES_CLIENT = "${APP_NAME}_postgreSQLClient_${NODE_NAME}_${BUILD_NUMBER}"
-        SIDECAR_NETWORK = "${APP_NAME}_sidecar_network_${BUILD_TAG}"
-        CCI_CLIENT = "${APP_NAME}-cci-client_${NODE_NAME}_${BUILD_NUMBER}"
-        CircleciContainerName = "${APP_NAME}-ci-test_${NODE_NAME}_${BUILD_NUMBER}"
-        CircleCiDockerImage = "circleci/elixir:1.12-node-browsers"
+      SlackChannel = '#jenkins-ci-mv-opentelemetry'
+      MIX_ENV = 'test'
+      POSTGRES_USER = 'ubuntu'
+      POSTGRES_PASSWORD = 'ubuntupassword'
+      POSTGRES_HOST = 'localhost'
     }
 
     stages {
-        stage('Install dependencies') {
-            steps {
-                script {
-                    docker.image("${CircleCiDockerImage}").inside("--name ${CircleciContainerName}") {
-                        sh '''
-                        (test -f SHASUMS && shasum -c SHASUMS) || git clean -fdx
-                        mix local.hex --force
-                        mix local.rebar --force
-                        (test -f SHASUMS && shasum -c SHASUMS) || mix do deps.get
-                        shasum mix.lock > SHASUMS
-                        '''
-                    }
-                }
-            }
+      stage('Install dependencies') {
+        steps {
+          container('ci-container') {
+            sh '''
+              (test -f SHASUMS && shasum -c SHASUMS) || git clean -fdx
+              mix local.hex --force
+              mix local.rebar --force
+              (test -f SHASUMS && shasum -c SHASUMS) || mix do deps.get
+              shasum mix.lock > SHASUMS
+            '''
+          }
+        }
+      }
+
+      stage('Run pre-checks') {
+        steps {
+          container('ci-container') {
+            sh '''
+              mix local.hex --force
+              mix local.rebar --force
+              mix format --check-formatted
+            '''
+            sh '''
+              mix local.hex --force
+              mix local.rebar --force
+              mix credo --strict
+            '''
+            sh '''
+              mix local.hex --force
+              mix local.rebar --force
+              mix dialyzer
+            '''
+          }
+        }
+      }
+
+      stage('Run mv-opentelemetry tests') {
+        steps {
+          container('ci-container') {
+            sh '''
+              sudo apt-get update
+              sudo apt-get install -y postgresql-client
+              mix local.hex --force
+              mix local.rebar --force
+              mix test
+            '''
+          }
         }
 
-        stage('Run pre-checks') {
-            steps {
-                script {
-                    docker.image("${CircleCiDockerImage}").inside("--name ${CircleciContainerName}") {
-                        sh '''
-                        mix local.hex --force
-                        mix local.rebar --force
-                        mix format --check-formatted
-                        '''
-                        sh '''
-                        mix local.hex --force
-                        mix local.rebar --force
-                        mix credo --strict
-                        '''
-                        sh '''
-                        mix local.hex --force
-                        mix local.rebar --force
-                        mix dialyzer
-                        '''
-                    }
-                }
+        post {
+          always {
+            script {
+              commit = sh(returnStdout: true, script: 'git rev-parse HEAD')
+              author = sh(returnStdout: true, script: "git --no-pager show -s --format='%an' ${commit}").trim()
+              message = sh(returnStdout: true, script: 'git log -1 --pretty=format:%s').trim()
+              slack_commit_msg = "\n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Info: * ${env.BUILD_URL}\n*GitHub: * ${message} -> (`${commit.take(9)}` by ${author})"
             }
+          }
+          success {
+            slackSend (
+              channel: env.SlackChannel,
+              color: '#00FF00',
+              message: "Hurray! CI tests *Success* ${slack_commit_msg}"
+            )
+          }
+          failure {
+            slackSend (
+              channel: env.SlackChannel,
+              color: '#FF0000',
+              message: "Oops, something's wrong; CI *Failed* ${slack_commit_msg}"
+            )
+          }
         }
-
-        stage('Run mv-opentelemetry tests') {
-            steps {
-                script {
-                    echo env.SIDECAR_NETWORK
-                    sh '''
-                    docker network create --driver bridge $SIDECAR_NETWORK
-                    docker network ls
-                    docker network inspect $SIDECAR_NETWORK
-                    '''
-                    docker.image('postgres:12').withRun("--name ${POSTGRES_HOST} --network ${SIDECAR_NETWORK} -p 5432 -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD}") { db ->
-                        docker.image('postgres:12').inside("--network ${SIDECAR_NETWORK} --name ${POSTGRES_CLIENT}") {
-                            sh '''
-                          psql --version
-                          sleep 2
-                          until pg_isready -h ${POSTGRES_HOST}
-                          do
-                            echo "Waiting for postgres to be ready"
-                            sleep 2;
-                          done
-                          '''
-                        }
-
-                        docker.image("${CircleCiDockerImage}").inside("--name ${CCI_CLIENT} --network ${SIDECAR_NETWORK}") {
-                            sh '''
-                                sudo apt-get update
-                                sudo apt-get install -y postgresql-client
-                                mix local.hex --force
-                                mix local.rebar --force
-                                mix test
-                                '''
-                        }
-                    }
-                }
-            }
-
-            // always remove docker created network
-            post {
-                always {
-                    script {
-                        commit = sh(returnStdout: true, script: 'git rev-parse HEAD')
-                        author = sh(returnStdout: true, script: "git --no-pager show -s --format='%an' ${commit}").trim()
-                        message = sh(returnStdout: true, script: 'git log -1 --pretty=format:%s').trim()
-                        slack_commit_msg = "\n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Info: * ${env.BUILD_URL}\n*GitHub: * ${message} -> (`${commit.take(9)}` by ${author})"
-                        sh '''
-                    docker network rm "${SIDECAR_NETWORK}"
-                    '''
-                    }
-                }
-                success {
-                    slackSend (
-                        channel: env.SlackChannel,
-                        color: '#00FF00',
-                        message: "Hurray! CI tests *Success* ${slack_commit_msg}"
-                    )
-                }
-                failure {
-                    slackSend (
-                        channel: env.SlackChannel,
-                        color: '#FF0000',
-                        message: "Oops, something's wrong; CI *Failed* ${slack_commit_msg}"
-                    )
-                }
-            }
-        }
-
+      }
     }
 }
