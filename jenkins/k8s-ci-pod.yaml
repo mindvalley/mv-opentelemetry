@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: jenkins
+    component: agent
+spec:
+  nodeSelector:
+    node: jenkins-node-ctnd
+  containers:
+  - name: ci-container
+    image: circleci/elixir:1.12-node-browsers
+    imagePullPolicy: IfNotPresent
+    command:
+    - sleep
+    args:
+    - 99d
+    tty: true
+    securityContext:
+      runAsUser: 0
+    env:
+    - name: MIX_ENV
+      value: 'test'
+    volumeMounts:
+    - mountPath: /home/jenkins/agent
+      name: volume-0
+    workingDir: /home/jenkins/agent
+  - name: postgres
+    image: postgres:12-alpine
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: POSTGRES_USER
+      value: 'ubuntu'
+    - name: POSTGRES_PASSWORD
+      value: 'ubuntupassword'
+  - image: gcr.io/mv-auxiliary/jenkins-slave:v4
+    imagePullPolicy: IfNotPresent
+    name: jnlp
+    resources:
+      requests:
+        cpu: "1"
+        memory: 4Gi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    tty: true
+    volumeMounts:
+    - mountPath: /home/jenkins/agent
+      name: volume-0
+    workingDir: /home/jenkins/agent
+  volumes:
+  - name: volume-0
+    persistentVolumeClaim:
+      claimName: nfs
