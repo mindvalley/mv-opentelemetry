@@ -36,10 +36,18 @@ defmodule MvOpentelemetry.DataloaderTest do
     |> Dataloader.load_many(MvOpentelemetryHarness.Repo, MvOpentelemetryHarness.Page, page_ids)
     |> Dataloader.run()
 
-    assert_receive {:span, span_record}
-    assert "dataloader.source.batch.run" == span(span_record, :name)
+    assert_receive {:span, span(name: "dataloader.source.batch.run") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
-    assert attributes == %{"service.component" => "test.harness"}
+
+    expected_attributes = %{
+      "dataloader.source.batch.cardinality" => :one,
+      "dataloader.source.batch.column" => :id,
+      "dataloader.source.batch.queryable" => MvOpentelemetryHarness.Page,
+      "dataloader.source.batch.type" => "queryable",
+      "service.component" => "test.harness"
+    }
+
+    assert attributes == expected_attributes
 
     :ok = :telemetry.detach({:test_dataloader_tracer, MvOpentelemetry.Dataloader})
   end
@@ -56,8 +64,7 @@ defmodule MvOpentelemetry.DataloaderTest do
     |> Dataloader.load_many(MvOpentelemetryHarness.Pet, MvOpentelemetryHarness.Pet, [1])
     |> Dataloader.run()
 
-    assert_receive {:span, span_record}
-    assert "dataloader.source.run" == span(span_record, :name)
+    assert_receive {:span, span(name: "dataloader.source.run") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     assert attributes == %{"service.component" => "test.harness"}
 
