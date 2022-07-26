@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # Configure your database
 config :mv_opentelemetry_harness, MvOpentelemetryHarness.Repo,
