@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :mv_opentelemetry_harness,
   ecto_repos: [MvOpentelemetryHarness.Repo]

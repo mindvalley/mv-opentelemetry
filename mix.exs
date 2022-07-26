@@ -26,8 +26,14 @@ defmodule MvOpentelemetry.MixProject do
     ]
   end
 
-  defp extra_applications(:test), do: [:logger, :runtime_tools, :mv_opentelemetry_harness]
-  defp extra_applications(:dev), do: [:logger, :runtime_tools, :mv_opentelemetry_harness]
+  defp extra_applications(:test) do
+    [:logger, :runtime_tools, :opentelemetry_exporter, :opentelemetry, :mv_opentelemetry_harness]
+  end
+
+  defp extra_applications(:dev) do
+    [:logger, :runtime_tools, :opentelemetry_exporter, :opentelemetry, :mv_opentelemetry_harness]
+  end
+
   defp extra_applications(_), do: [:logger, :runtime_tools]
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
@@ -37,7 +43,7 @@ defmodule MvOpentelemetry.MixProject do
   defp deps do
     [
       # OpenTelemetry
-      {:opentelemetry_telemetry, "~> 1.0.0-beta.2"},
+      {:opentelemetry_telemetry, "~> 1.0"},
       {:opentelemetry_api, "~> 1.0", override: true},
       {:opentelemetry_process_propagator, "~> 0.1.1"},
 
