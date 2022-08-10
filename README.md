@@ -32,7 +32,7 @@ which can send data to any OTLP enabled collector.
 ```elixir
 def deps do
   [
-    {:mv_opentelemetry, github: "mindvalley/mv-opentelemetry", tag: "v1.0.0"},
+    {:mv_opentelemetry, github: "mindvalley/mv-opentelemetry", tag: "v1.5.0"},
     {:opentelemetry_exporter, "~> 1.0.0"},
   ]
 end
@@ -60,6 +60,25 @@ config :opentelemetry,
   ]
 ```
 
+Then you need to add opentelemetry to the list of extra applications running in your system:
+```
+# mix.exs
+def application do
+  [
+    mod: {MyApp.Application, []},
+    extra_applications: [
+      :opentelemetry_exporter,
+      :opentelemetry
+    ]
+  ]
+end
+# or in release section
+releases: [
+  my_instrumented_release: [
+    applications: [opentelemetry_exporter: :permanent, opentelemetry: :temporary]
+  ]
+
+```
 ## Contributing
 
 When you want to open a PR to this repository, ensure that you sign the Certificate of origin:
