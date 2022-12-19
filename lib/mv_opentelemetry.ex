@@ -1,6 +1,4 @@
 defmodule MvOpentelemetry do
-  alias MvOpentelemetry.Broadway
-
   @moduledoc """
   Top level module for Opentelemetry instrumentation, as used at Mindvalley.
   Used to publish Opentelemetry events to applicable processors, for example
@@ -32,12 +30,14 @@ defmodule MvOpentelemetry do
   Registers tracer for given functional area. Allowed areas are: :ecto, :plug, :absinthe,
   :dataloader and :live_view
   """
-  @spec register_tracer(:ecto | :plug | :live_view | :absinthe | :dataloader | :broadway) :: :ok
+  @type traced_apps() :: :absinthe | :broadway | :dataloader | :ecto | :plug | :live_view | :oban
+
+  @spec register_tracer(traced_apps()) :: :ok
   def register_tracer(atom), do: register_tracer(atom, [])
 
   @doc """
   Registers tracer for given functional area with options.
-  Allowed areas are: :absinthe, :dataloader, :ecto, :phoenix and :live_view.
+  Allowed areas are: :absinthe, :broadway, :dataloader, :ecto, :live_view, :oban and :phoenix.
   You can also provide following options:
 
   ## Ecto
@@ -73,20 +73,22 @@ defmodule MvOpentelemetry do
       from this group, for example [{"service.component", "ecto"}]. Defaults to []
     - `query_params_whitelist` OPTIONAL list of query param names you want to allow to log in your
       traces, i.e ["user_id", "product_id"]. Defaults to logging all.
+
   ## Broadway
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
       from this group, for example [{"service.component", "my_app"}]. Defaults to []
-  """
-  @spec register_tracer(
-          :absinthe | :dataloader | :ecto | :plug | :live_view | :broadway,
-          Access.t()
-        ) :: :ok
-  def register_tracer(:absinthe, opts), do: MvOpentelemetry.Absinthe.register_tracer(opts)
-  def register_tracer(:dataloader, opts), do: MvOpentelemetry.Dataloader.register_tracer(opts)
-  def register_tracer(:ecto, opts), do: MvOpentelemetry.Ecto.register_tracer(opts)
-  def register_tracer(:plug, opts), do: MvOpentelemetry.Plug.register_tracer(opts)
-  def register_tracer(:live_view, opts), do: MvOpentelemetry.LiveView.register_tracer(opts)
 
-  def register_tracer(:broadway, opts),
-    do: Broadway.Messages.register_tracer(opts)
+  ## Oban
+    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
+      from this group, for example [{"service.component", "my_app"}]. Defaults to []
+  """
+
+  @spec register_tracer(traced_apps(), Access.t()) :: :ok
+  def register_tracer(:absinthe, opts), do: __MODULE__.Absinthe.register_tracer(opts)
+  def register_tracer(:broadway, opts), do: __MODULE__.Broadway.Messages.register_tracer(opts)
+  def register_tracer(:dataloader, opts), do: __MODULE__.Dataloader.register_tracer(opts)
+  def register_tracer(:ecto, opts), do: __MODULE__.Ecto.register_tracer(opts)
+  def register_tracer(:live_view, opts), do: __MODULE__.LiveView.register_tracer(opts)
+  def register_tracer(:oban, opts), do: __MODULE__.Oban.register_tracer(opts)
+  def register_tracer(:plug, opts), do: __MODULE__.Plug.register_tracer(opts)
 end

@@ -49,7 +49,10 @@ defmodule MvOpentelemetryHarness.MixProject do
       # Absinthe
       {:absinthe, "~> 1.6"},
       {:absinthe_plug, "~> 1.5"},
-      {:dataloader, "~> 1.0.0"}
+      {:dataloader, "~> 1.0.0"},
+
+      # Oban
+      {:oban, "~> 2.0"}
     ]
   end
 

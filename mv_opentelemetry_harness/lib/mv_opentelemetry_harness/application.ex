@@ -14,9 +14,11 @@ defmodule MvOpentelemetryHarness.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: MvOpentelemetryHarness.PubSub},
       # Start the Endpoint (http/https)
-      MvOpentelemetryHarnessWeb.Endpoint
+      MvOpentelemetryHarnessWeb.Endpoint,
       # Start a worker by calling: MvOpentelemetryHarness.Worker.start_link(arg)
       # {MvOpentelemetryHarness.Worker, arg}
+
+      {Oban, repo: MvOpentelemetryHarness.Repo, plugins: [Oban.Plugins.Pruner]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
