@@ -1,4 +1,6 @@
 defmodule MvOpentelemetry do
+  alias MvOpentelemetry.Broadway
+
   @moduledoc """
   Top level module for Opentelemetry instrumentation, as used at Mindvalley.
   Used to publish Opentelemetry events to applicable processors, for example
@@ -16,6 +18,7 @@ defmodule MvOpentelemetry do
     :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :replica_repo])
     :ok = MvOpentelemetry.register_tracer(:plug)
     :ok = MvOpentelemetry.register_tracer(:live_view)
+    :ok = MvOpentelemetry.register_tracer(:broadway)
   end
 
   ```
@@ -29,7 +32,7 @@ defmodule MvOpentelemetry do
   Registers tracer for given functional area. Allowed areas are: :ecto, :plug, :absinthe,
   :dataloader and :live_view
   """
-  @spec register_tracer(:ecto | :plug | :live_view | :absinthe | :dataloader) :: :ok
+  @spec register_tracer(:ecto | :plug | :live_view | :absinthe | :dataloader | :broadway) :: :ok
   def register_tracer(atom), do: register_tracer(atom, [])
 
   @doc """
@@ -70,12 +73,20 @@ defmodule MvOpentelemetry do
       from this group, for example [{"service.component", "ecto"}]. Defaults to []
     - `query_params_whitelist` OPTIONAL list of query param names you want to allow to log in your
       traces, i.e ["user_id", "product_id"]. Defaults to logging all.
-
+  ## Broadway
+    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
+      from this group, for example [{"service.component", "my_app"}]. Defaults to []
   """
-  @spec register_tracer(:absinthe | :dataloader | :ecto | :plug | :live_view, Access.t()) :: :ok
+  @spec register_tracer(
+          :absinthe | :dataloader | :ecto | :plug | :live_view | :broadway,
+          Access.t()
+        ) :: :ok
   def register_tracer(:absinthe, opts), do: MvOpentelemetry.Absinthe.register_tracer(opts)
   def register_tracer(:dataloader, opts), do: MvOpentelemetry.Dataloader.register_tracer(opts)
   def register_tracer(:ecto, opts), do: MvOpentelemetry.Ecto.register_tracer(opts)
   def register_tracer(:plug, opts), do: MvOpentelemetry.Plug.register_tracer(opts)
   def register_tracer(:live_view, opts), do: MvOpentelemetry.LiveView.register_tracer(opts)
+
+  def register_tracer(:broadway, opts),
+    do: Broadway.Messages.register_tracer(opts)
 end
