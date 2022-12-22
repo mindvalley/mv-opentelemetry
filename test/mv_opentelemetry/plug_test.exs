@@ -2,8 +2,6 @@ defmodule MvOpentelemetry.PlugTest do
   use MvOpentelemetry.OpenTelemetryCase
 
   test "handles successful requests in stories-specific context", %{conn: conn} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.Plug.register_tracer(
       span_prefix: [:harness, :request],
       default_attributes: [{"service.component", "test.harness"}]
@@ -38,8 +36,6 @@ defmodule MvOpentelemetry.PlugTest do
   end
 
   test "allows for setting a force trace header", %{conn: conn} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.Plug.register_tracer(span_prefix: [:harness, :request])
 
     conn
@@ -63,8 +59,6 @@ defmodule MvOpentelemetry.PlugTest do
   end
 
   test "allows for setting query params whitelist", %{conn: conn} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.Plug.register_tracer(
       span_prefix: [:harness, :request],
       query_params_whitelist: ["user_id"],

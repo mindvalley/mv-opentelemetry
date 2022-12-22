@@ -2,8 +2,6 @@ defmodule MvOpentelemetry.EctoTest do
   use MvOpentelemetry.OpenTelemetryCase
 
   test "sends otel events to pid" do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.Ecto.register_tracer(
       tracer_id: :test_ecto_tracer,
       span_prefix: [:mv_opentelemetry_harness, :repo],
@@ -30,8 +28,6 @@ defmodule MvOpentelemetry.EctoTest do
   end
 
   test "raises when span_prefix is not given" do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     assert_raise MvOpentelemetry.Error, "span_prefix is required", fn ->
       MvOpentelemetry.Ecto.register_tracer([])
     end

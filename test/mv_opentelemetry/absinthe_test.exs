@@ -2,8 +2,6 @@ defmodule MvOpentelemetry.AbsintheTest do
   use MvOpentelemetry.OpenTelemetryCase
 
   test "sends field events when asked for it", %{conn: conn} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.Absinthe.register_tracer(
       name: :test_absinthe_tracer,
       default_attributes: [{"service.component", "test.harness"}],
@@ -52,8 +50,6 @@ defmodule MvOpentelemetry.AbsintheTest do
   end
 
   test "sends only top-level events", %{conn: conn} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_tracer)
 
     query = """
@@ -90,7 +86,6 @@ defmodule MvOpentelemetry.AbsintheTest do
   end
 
   test "sends error data to pid", %{conn: conn} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
     MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_error_tracer)
 
     # Here be error

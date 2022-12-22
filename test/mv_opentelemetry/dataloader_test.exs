@@ -16,8 +16,6 @@ defmodule MvOpentelemetry.DataloaderTest do
   end
 
   test "sends batch events", %{dataloader: loader} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.Dataloader.register_tracer(
       name: :test_dataloader_tracer,
       default_attributes: [{"service.component", "test.harness"}]
@@ -53,8 +51,6 @@ defmodule MvOpentelemetry.DataloaderTest do
   end
 
   test "sends source events", %{dataloader: loader} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.Dataloader.register_tracer(
       name: :test_dataloader_tracer,
       default_attributes: [{"service.component", "test.harness"}]
