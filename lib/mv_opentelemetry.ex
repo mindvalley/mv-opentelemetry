@@ -30,7 +30,8 @@ defmodule MvOpentelemetry do
   Registers tracer for given functional area. Allowed areas are: :ecto, :plug, :absinthe,
   :dataloader and :live_view
   """
-  @type traced_apps() :: :absinthe | :broadway | :dataloader | :ecto | :plug | :live_view | :oban
+  @type traced_apps ::
+          :absinthe | :broadway | :dataloader | :ecto | :finch | :live_view | :plug | :oban
 
   @spec register_tracer(traced_apps()) :: :ok
   def register_tracer(atom), do: register_tracer(atom, [])
@@ -80,6 +81,10 @@ defmodule MvOpentelemetry do
 
   ## Oban
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
+    from this group, for example [{"service.component", "my_app"}]. Defaults to []
+
+  ## Finch
+    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
       from this group, for example [{"service.component", "my_app"}]. Defaults to []
   """
 
@@ -88,6 +93,7 @@ defmodule MvOpentelemetry do
   def register_tracer(:broadway, opts), do: __MODULE__.Broadway.Messages.register_tracer(opts)
   def register_tracer(:dataloader, opts), do: __MODULE__.Dataloader.register_tracer(opts)
   def register_tracer(:ecto, opts), do: __MODULE__.Ecto.register_tracer(opts)
+  def register_tracer(:finch, opts), do: __MODULE__.Finch.register_tracer(opts)
   def register_tracer(:live_view, opts), do: __MODULE__.LiveView.register_tracer(opts)
   def register_tracer(:oban, opts), do: __MODULE__.Oban.register_tracer(opts)
   def register_tracer(:plug, opts), do: __MODULE__.Plug.register_tracer(opts)

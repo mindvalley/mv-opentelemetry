@@ -52,7 +52,10 @@ defmodule MvOpentelemetryHarness.MixProject do
       {:dataloader, "~> 1.0.0"},
 
       # Oban
-      {:oban, "~> 2.0"}
+      {:oban, "~> 2.0"},
+
+      # HTTP clients
+      {:finch, "~> 0.14"}
     ]
   end
 

@@ -56,7 +56,8 @@ defmodule MvOpentelemetry.MixProject do
       {:plug, "~> 1.0", optional: true},
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:bypass, "~> 2.1", only: [:test]}
     ]
   end
 
