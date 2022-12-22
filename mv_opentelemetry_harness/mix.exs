@@ -44,6 +44,7 @@ defmodule MvOpentelemetryHarness.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
+      {:broadway, "~> 1.0"},
 
       # Absinthe
       {:absinthe, "~> 1.6"},
