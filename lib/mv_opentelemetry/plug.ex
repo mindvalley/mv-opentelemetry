@@ -95,7 +95,9 @@ defmodule MvOpentelemetry.Plug do
 
     event_name = "HTTP #{conn.method}"
 
-    OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
+    OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{
+      kind: :server
+    })
     |> Span.set_attributes(attributes)
 
     :ok
