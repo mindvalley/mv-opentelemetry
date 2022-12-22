@@ -32,6 +32,16 @@ defmodule MvOpentelemetry.OpenTelemetryCase do
 
     conn = Phoenix.ConnTest.build_conn()
 
+    # Restart the app between each test and set exporter to current pid
+    :application.stop(:opentelemetry)
+    :application.set_env(:opentelemetry, :tracer, :otel_tracer_default)
+
+    :application.set_env(:opentelemetry, :processors, [
+      {:otel_batch_processor, %{scheduled_delay_ms: 1, exporter: {:otel_exporter_pid, self()}}}
+    ])
+
+    :application.start(:opentelemetry)
+
     {:ok, conn: conn}
   end
 end

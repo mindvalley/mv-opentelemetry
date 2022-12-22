@@ -26,8 +26,6 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :opentelemetry, processors: [otel_batch_processor: %{scheduled_delay_ms: 1}]
-
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used

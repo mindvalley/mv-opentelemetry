@@ -3,8 +3,6 @@ defmodule MvOpentelemetry.LiveViewTest do
   import Phoenix.LiveViewTest
 
   test "sends OpenTelemetry events to pid()", %{conn: conn} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.LiveView.register_tracer(
       name: :test_live_view_tracer,
       default_attributes: [{"potatoeh", "potatoe"}]
@@ -31,8 +29,6 @@ defmodule MvOpentelemetry.LiveViewTest do
   end
 
   test "allows for setting query params whitelist", %{conn: conn} do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     MvOpentelemetry.LiveView.register_tracer(
       name: :test_live_view_tracer,
       query_params_whitelist: ["user_id"]

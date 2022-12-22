@@ -4,7 +4,6 @@ defmodule MvOpentelemetry.SpanTracerTest do
   alias MvOpentelemetry.CustomSpanTracer
 
   test "it captures the event" do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
     CustomSpanTracer.register_tracer()
 
     :telemetry.span([:my_event, :do_stuff], %{name: "custom"}, fn ->
@@ -21,7 +20,6 @@ defmodule MvOpentelemetry.SpanTracerTest do
   end
 
   test "it captures the exception" do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
     CustomSpanTracer.register_tracer()
 
     try do

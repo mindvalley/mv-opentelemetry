@@ -4,8 +4,6 @@ defmodule MvOpentelemetry.Broadway.MessagesTest do
   alias MvOpentelemetryHarness.BroadwayDummy
 
   test "sends otel events to pid" do
-    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
-
     Messages.register_tracer(
       name: :test_broadway_tracer,
       default_attributes: [{"service.component", "test.harness"}]
