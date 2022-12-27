@@ -17,17 +17,18 @@ defmodule MvOpentelemetry.PlugTest do
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
     assert {"http.status", 200} in attributes
-    assert {"http.method", "GET"} in attributes
-    assert {"http.flavor", ""} in attributes
-    assert {"http.target", "/"} in attributes
+    assert {:"http.status_code", 200} in attributes
+    assert {:"http.method", "GET"} in attributes
+    assert {:"http.flavor", ""} in attributes
+    assert {:"http.target", "/"} in attributes
     assert {"service.component", "test.harness"} in attributes
     assert {"http.query_params.query", "1234"} in attributes
     assert {"http.query_params.user_id", ""} in attributes
-    assert {"http.user_agent", "Phoenix Test"} in attributes
+    assert {:"http.user_agent", "Phoenix Test"} in attributes
     assert {"http.referer", "http://localhost"} in attributes
-    assert {"net.transport", "IP.TCP"} in attributes
+    assert {:"net.transport", "IP.TCP"} in attributes
     assert "http.request_id" in keys
-    assert "http.client_ip" in keys
+    assert :"http.client_ip" in keys
     assert "net.peer.ip" in keys
     assert "net.peer.port" in keys
 
@@ -75,17 +76,18 @@ defmodule MvOpentelemetry.PlugTest do
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
     assert {"http.status", 200} in attributes
-    assert {"http.method", "GET"} in attributes
-    assert {"http.flavor", ""} in attributes
-    assert {"http.target", "/"} in attributes
+    assert {:"http.status_code", 200} in attributes
+    assert {:"http.method", "GET"} in attributes
+    assert {:"http.flavor", ""} in attributes
+    assert {:"http.target", "/"} in attributes
     assert {"service.component", "test.harness"} in attributes
     refute {"http.query_params.query", "1234"} in attributes
     assert {"http.query_params.user_id", "1233"} in attributes
-    assert {"http.user_agent", "Phoenix Test"} in attributes
+    assert {:"http.user_agent", "Phoenix Test"} in attributes
     assert {"http.referer", "http://localhost"} in attributes
-    assert {"net.transport", "IP.TCP"} in attributes
+    assert {:"net.transport", "IP.TCP"} in attributes
     assert "http.request_id" in keys
-    assert "http.client_ip" in keys
+    assert :"http.client_ip" in keys
     assert "net.peer.ip" in keys
     assert "net.peer.port" in keys
 

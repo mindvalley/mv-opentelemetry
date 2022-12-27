@@ -2,6 +2,7 @@ defmodule MvOpentelemetry.Plug do
   @moduledoc false
 
   alias OpenTelemetry.Span
+  require OpenTelemetry.SemanticConventions.Trace, as: Trace
 
   @spec register_tracer(opts :: Access.t()) :: :ok
   def register_tracer(opts) do
@@ -66,20 +67,20 @@ defmodule MvOpentelemetry.Plug do
     client_ip = client_ip(conn)
 
     attributes = [
-      {"http.client_ip", client_ip},
+      {Trace.http_client_ip(), client_ip},
       {"http.host", conn.host},
-      {"http.method", conn.method},
-      {"http.scheme", "#{conn.scheme}"},
-      {"http.target", conn.request_path},
+      {Trace.http_method(), conn.method},
+      {Trace.http_scheme(), "#{conn.scheme}"},
+      {Trace.http_target(), conn.request_path},
       {"http.request_id", request_id},
-      {"http.user_agent", user_agent},
+      {Trace.http_user_agent(), user_agent},
       {"http.referer", referer},
-      {"http.flavor", http_flavor(conn.adapter)},
+      {Trace.http_flavor(), http_flavor(conn.adapter)},
       {"net.host.ip", to_string(:inet_parse.ntoa(conn.remote_ip))},
       {"net.host.port", conn.port},
       {"net.peer.ip", to_string(:inet_parse.ntoa(peer_ip))},
       {"net.peer.port", peer_data.port},
-      {"net.transport", "IP.TCP"}
+      {Trace.net_transport(), "IP.TCP"}
     ]
 
     query_attributes =
@@ -106,7 +107,11 @@ defmodule MvOpentelemetry.Plug do
   @spec handle_stop_event(_ :: any(), _ :: any(), %{conn: Plug.Conn.t()}, Access.t()) :: :ok
   def handle_stop_event(_, _, %{conn: conn} = meta, opts) do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
-    Span.set_attribute(ctx, "http.status", conn.status)
+
+    Span.set_attributes(ctx, %{
+      "http.status" => conn.status,
+      Trace.http_status_code() => conn.status
+    })
 
     if conn.status >= 400 do
       Span.set_status(ctx, OpenTelemetry.status(:error, ""))
