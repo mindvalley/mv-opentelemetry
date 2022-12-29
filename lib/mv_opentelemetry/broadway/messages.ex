@@ -24,15 +24,16 @@ defmodule MvOpentelemetry.Broadway.Messages do
     event_name = "broadway.processor.start"
     attributes = attributes ++ opts[:default_attributes]
 
-    OpentelemetryTelemetry.start_telemetry_span(__MODULE__, event_name, meta, %{
+    OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{
       attributes: attributes
     })
 
     :ok
   end
 
-  def handle_event([:broadway, :processor, :stop], _measurements, metadata, opts) do
-    OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], metadata)
+  def handle_event([:broadway, :processor, :stop], _measurements, meta, opts) do
+    OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
+    OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
   end
 
   def handle_event([:broadway, :processor, :message, :start], _measurements, meta, opts) do
@@ -46,6 +47,7 @@ defmodule MvOpentelemetry.Broadway.Messages do
   end
 
   def handle_event([:broadway, :processor, :message, :stop], _measurements, meta, opts) do
+    OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
   end
 
