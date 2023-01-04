@@ -68,7 +68,9 @@ defmodule MvOpentelemetry.Plug do
 
     attributes = [
       {Trace.http_client_ip(), client_ip},
-      {"http.host", conn.host},
+      # Remove this field after some time in favour of Trace.net_peer_name()
+      {:"http.host", conn.host},
+      {Trace.net_peer_name(), conn.host},
       {Trace.http_method(), conn.method},
       {Trace.http_scheme(), "#{conn.scheme}"},
       {Trace.http_target(), conn.request_path},
@@ -109,7 +111,8 @@ defmodule MvOpentelemetry.Plug do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
 
     Span.set_attributes(ctx, %{
-      "http.status" => conn.status,
+      # Remove this field after some time in favour of Trace.http_status_code()
+      :"http.status" => conn.status,
       Trace.http_status_code() => conn.status
     })
 

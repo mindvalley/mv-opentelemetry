@@ -25,6 +25,7 @@ defmodule MvOpentelemetry.Finch do
     finch_attributes = [
       {Trace.http_method(), method},
       {Trace.http_scheme(), scheme},
+      {:"http.host", host},
       {Trace.net_peer_name(), host},
       {Trace.net_peer_port(), port},
       {Trace.http_target(), path},
@@ -52,7 +53,11 @@ defmodule MvOpentelemetry.Finch do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
 
     if status do
-      Span.set_attribute(ctx, Trace.http_status_code(), status)
+      Span.set_attributes(ctx, %{
+        # Remove this field after some time in favour of Trace.http_status_code()
+        :"http.status" => status,
+        Trace.http_status_code() => status
+      })
     end
 
     if error do
