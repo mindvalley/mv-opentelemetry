@@ -21,7 +21,10 @@ defmodule MvOpentelemetryHarnessWeb.Router do
     pipe_through :api
     pipe_through :telemetry
 
-    forward "/graphql", Absinthe.Plug, schema: MvOpentelemetryHarnessWeb.Schema
+    forward "/graphql", Absinthe.Plug,
+      schema: MvOpentelemetryHarnessWeb.Schema,
+      analyze_complexity: true
+
     forward "/graphiql", Absinthe.Plug.GraphiQL, schema: MvOpentelemetryHarnessWeb.Schema
   end
 

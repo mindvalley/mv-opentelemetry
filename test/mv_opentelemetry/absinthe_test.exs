@@ -81,6 +81,7 @@ defmodule MvOpentelemetry.AbsintheTest do
 
     assert {"graphql.operation.input", query} in attributes
     assert {"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
+    assert {"graphql.operation.complexity", 5} in attributes
 
     :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
   end
@@ -116,6 +117,7 @@ defmodule MvOpentelemetry.AbsintheTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert {"graphql.operation.input", query} in attributes
+    assert {"graphql.operation.complexity", nil} in attributes
     assert {"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
     :ok = :telemetry.detach({:test_absinthe_error_tracer, MvOpentelemetry.Absinthe})
