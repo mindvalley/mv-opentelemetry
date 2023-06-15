@@ -105,11 +105,18 @@ defmodule MvOpentelemetry.Absinthe do
 
   def handle_event([:absinthe, :execute, :operation, :stop], _measurements, meta, opts) do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
-    operation = Absinthe.Blueprint.current_operation(meta.blueprint)
+    current_operation = Absinthe.Blueprint.current_operation(meta.blueprint)
+
+    complexity =
+      if current_operation do
+        current_operation.complexity
+      else
+        nil
+      end
 
     attributes = [
       {"graphql.operation.schema", meta.blueprint.schema},
-      {"graphql.operation.complexity", operation.complexity}
+      {"graphql.operation.complexity", complexity}
     ]
 
     Span.set_attributes(ctx, attributes)
