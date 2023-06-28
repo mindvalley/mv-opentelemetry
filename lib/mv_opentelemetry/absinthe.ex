@@ -105,13 +105,13 @@ defmodule MvOpentelemetry.Absinthe do
 
   def handle_event([:absinthe, :execute, :operation, :stop], _measurements, meta, opts) do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
-    current_operation = Absinthe.Blueprint.current_operation(meta.blueprint)
 
     complexity =
-      if current_operation do
-        current_operation.complexity
+      with true <- function_exported?(Absinthe.Blueprint, :current_operation, 1),
+           %{complexity: complexity} <- Absinthe.Blueprint.current_operation(meta.blueprint) do
+        complexity
       else
-        nil
+        _ -> nil
       end
 
     attributes = [
