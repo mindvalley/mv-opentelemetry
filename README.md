@@ -1,5 +1,7 @@
 # MvOpentelemetry
 
+[![Static Application Security Testing](https://github.com/mindvalley/mv-opentelemetry/actions/workflows/gh-action-sast-ci.yaml/badge.svg)](https://github.com/mindvalley/mv-opentelemetry/actions/workflows/gh-action-sast-ci.yaml)
+
 OpenTelemetry instrumentation, as used in Mindvalley.
 
 Used to publish Opentelemetry events to applicable processors, for example
