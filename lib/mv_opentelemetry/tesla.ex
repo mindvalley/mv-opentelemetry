@@ -13,7 +13,7 @@ defmodule MvOpentelemetry.Tesla do
 
   def handle_event([:tesla, :request, :start], _measurements, meta, opts) do
     %{
-      env: %Tesla.Env{
+      env: %{
         method: method,
         url: url_string
       }
@@ -44,7 +44,7 @@ defmodule MvOpentelemetry.Tesla do
 
   def handle_event([:tesla, :request, :stop], _measurements, meta, opts) do
     %{
-      env: %Tesla.Env{
+      env: %{
         body: body,
         status: status
       }
