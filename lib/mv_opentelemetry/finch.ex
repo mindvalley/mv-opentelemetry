@@ -72,6 +72,18 @@ defmodule MvOpentelemetry.Finch do
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
   end
 
+  def handle_event(
+        [:finch, :request, :exception],
+        _measurements,
+        %{stacktrace: stacktrace, reason: reason} = meta,
+        opts
+      ) do
+    ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
+    Span.record_exception(ctx, reason, stacktrace)
+    Span.set_status(ctx, OpenTelemetry.status(:error, ""))
+    OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
+  end
+
   defp get_status({:ok, response}), do: response.status
   defp get_status(_), do: nil
 
