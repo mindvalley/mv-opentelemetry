@@ -31,7 +31,15 @@ defmodule MvOpentelemetry do
   :dataloader and :live_view
   """
   @type traced_apps ::
-          :absinthe | :broadway | :dataloader | :ecto | :finch | :live_view | :plug | :oban
+          :absinthe
+          | :broadway
+          | :dataloader
+          | :ecto
+          | :finch
+          | :live_view
+          | :plug
+          | :oban
+          | :tesla
 
   @spec register_tracer(traced_apps()) :: :ok
   def register_tracer(atom), do: register_tracer(atom, [])
@@ -86,6 +94,10 @@ defmodule MvOpentelemetry do
   ## Finch
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
       from this group, for example [{"service.component", "my_app"}]. Defaults to []
+
+  ## Tesla
+    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
+      from this group, for example [{"service.component", "my_app"}]. Defaults to []
   """
 
   @spec register_tracer(traced_apps(), Access.t()) :: :ok
@@ -97,4 +109,5 @@ defmodule MvOpentelemetry do
   def register_tracer(:live_view, opts), do: __MODULE__.LiveView.register_tracer(opts)
   def register_tracer(:oban, opts), do: __MODULE__.Oban.register_tracer(opts)
   def register_tracer(:plug, opts), do: __MODULE__.Plug.register_tracer(opts)
+  def register_tracer(:tesla, opts), do: __MODULE__.Tesla.register_tracer(opts)
 end

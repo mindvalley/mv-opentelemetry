@@ -55,7 +55,8 @@ defmodule MvOpentelemetryHarness.MixProject do
       {:oban, "~> 2.0"},
 
       # HTTP clients
-      {:finch, "~> 0.14"}
+      {:finch, "~> 0.14"},
+      {:tesla, "~> 1.4"}
     ]
   end
 
