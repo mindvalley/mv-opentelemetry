@@ -2,3 +2,4 @@ lib/mv_opentelemetry/ecto.ex:126: The call 'Elixir.OpenTelemetry.Ctx':attach(_co
 lib/mv_opentelemetry/ecto.ex:129: The variable _context@1 can never match since previous clauses completely covered the type 'undefined'
 lib/mv_opentelemetry/dataloader.ex:81: The call 'Elixir.OpenTelemetry.Ctx':detach(_context@1::map()) does not have an opaque term of type otel_ctx:token() as 1st argument
 lib/mv_opentelemetry/ecto.ex:129: The call 'Elixir.OpenTelemetry.Ctx':detach(_context@1::map()) does not have an opaque term of type otel_ctx:token() as 1st argument
+lib/mv_opentelemetry/tesla.ex:88: The call 'Elixir.OpenTelemetry.Ctx':detach(_context@1::map()) does not have an opaque term of type otel_ctx:token() as 1st argument
