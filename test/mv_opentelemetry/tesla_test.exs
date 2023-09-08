@@ -34,13 +34,13 @@ defmodule MvOpentelemetry.TeslaTest do
 
     Tesla.get(client, "/")
 
-    assert_receive {:span, span(name: "HTTP get") = span_record}
+    assert_receive {:span, span(name: "HTTP GET") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert :client == span(span_record, :kind)
 
     assert {:"http.status_code", 200} in attributes
-    assert {:"http.method", :get} in attributes
+    assert {:"http.method", "GET"} in attributes
     assert {:"http.target", "/"} in attributes
     assert {:"http.url", bypass_url} in attributes
     assert {"service.component", "test.harness"} in attributes
@@ -58,7 +58,7 @@ defmodule MvOpentelemetry.TeslaTest do
 
     Tesla.get(client, url)
 
-    assert_receive {:span, span(name: "HTTP get") = span_record}
+    assert_receive {:span, span(name: "HTTP GET") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert :client == span(span_record, :kind)
@@ -66,7 +66,7 @@ defmodule MvOpentelemetry.TeslaTest do
     keys = Enum.map(attributes, fn {k, _} -> k end)
 
     refute :"http.status_code" in keys
-    assert {:"http.method", :get} in attributes
+    assert {:"http.method", "GET"} in attributes
     assert {:"http.target", "/"} in attributes
     assert {:"http.url", url} in attributes
     assert {"service.component", "test.harness"} in attributes
