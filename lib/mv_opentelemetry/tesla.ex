@@ -21,6 +21,8 @@ defmodule MvOpentelemetry.Tesla do
 
     %{scheme: scheme, host: host, port: port, path: path} = URI.parse(url_string)
 
+    method = String.upcase(Atom.to_string(method))
+
     tesla_attributes = [
       {Trace.http_method(), method},
       {Trace.http_scheme(), scheme},
@@ -34,11 +36,15 @@ defmodule MvOpentelemetry.Tesla do
     attributes = opts[:default_attributes] ++ tesla_attributes
     span_name = "HTTP #{method}"
 
+    parent_context = OpentelemetryProcessPropagator.fetch_parent_ctx(2, :"$callers")
+    attach_context(parent_context)
+
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], span_name, meta, %{
       attributes: attributes,
       kind: :client
     })
 
+    detach_context(parent_context)
     :ok
   end
 
@@ -74,6 +80,12 @@ defmodule MvOpentelemetry.Tesla do
 
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
   end
+
+  defp attach_context(:undefined), do: :ok
+  defp attach_context(context), do: OpenTelemetry.Ctx.attach(context)
+
+  defp detach_context(:undefined), do: :ok
+  defp detach_context(context), do: OpenTelemetry.Ctx.detach(context)
 
   defp get_error({:error, %{__exception__: true} = exception}), do: Exception.message(exception)
   defp get_error({:error, reason}), do: inspect(reason)
