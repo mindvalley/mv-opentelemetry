@@ -91,9 +91,9 @@ defmodule MvOpentelemetry.Finch do
   defp get_error({:error, reason}), do: inspect(reason)
   defp get_error(_), do: nil
 
-  defp get_content_length(result) do
+  def get_content_length(result) do
     with {:ok, %{headers: headers}} <- result,
-         length <- :proplists.get_value("content-length", headers, :error),
+         length <- :proplists.get_value("content-length", headers, ""),
          {int, ""} <- Integer.parse(length) do
       int
     else
