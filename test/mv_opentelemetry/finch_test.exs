@@ -17,6 +17,28 @@ defmodule MvOpentelemetry.FinchTest do
 
   setup [:setup_bypass, :setup_finch]
 
+  describe "get_content_length/1" do
+    test "handles 'content-length' header" do
+      result = {:ok, %{headers: [{"content-length", "123"}]}}
+      assert MvOpentelemetry.Finch.get_content_length(result) == 123
+    end
+
+    test "handles missing 'content-length' header" do
+      result = {:ok, %{headers: []}}
+      assert MvOpentelemetry.Finch.get_content_length(result) == nil
+    end
+
+    test "handles invalid 'content-length' header" do
+      result = {:ok, %{headers: [{"content-length", "abc"}]}}
+      assert MvOpentelemetry.Finch.get_content_length(result) == nil
+    end
+
+    test "handles error case" do
+      result = :yeet
+      assert MvOpentelemetry.Finch.get_content_length(result) == nil
+    end
+  end
+
   test "emits events on success", %{bypass: bypass, bypass_url: bypass_url} do
     MvOpentelemetry.Finch.register_tracer(
       name: :test_finch_tracer,

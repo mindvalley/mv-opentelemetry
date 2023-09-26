@@ -23,6 +23,28 @@ defmodule MvOpentelemetry.TeslaTest do
 
   setup [:setup_bypass, :setup_tesla_client]
 
+  describe "get_content_length/1" do
+    test "handles 'content-length' header" do
+      result = {:ok, %{headers: [{"content-length", "123"}]}}
+      assert MvOpentelemetry.Tesla.get_content_length(result) == 123
+    end
+
+    test "handles missing 'content-length' header" do
+      result = {:ok, %{headers: []}}
+      assert MvOpentelemetry.Tesla.get_content_length(result) == nil
+    end
+
+    test "handles invalid 'content-length' header" do
+      result = {:ok, %{headers: [{"content-length", "abc"}]}}
+      assert MvOpentelemetry.Tesla.get_content_length(result) == nil
+    end
+
+    test "handles error case" do
+      result = :yeet
+      assert MvOpentelemetry.Tesla.get_content_length(result) == nil
+    end
+  end
+
   test "emits events on success", %{bypass: bypass, bypass_url: bypass_url, tesla_client: client} do
     MvOpentelemetry.Tesla.register_tracer(
       name: :test_tesla_tracer,
