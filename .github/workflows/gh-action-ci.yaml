@@ -10,9 +10,9 @@ on:
 env:
   SlackChannel: '#jenkins-ci-mv-opentelemetry'
   MIX_ENV: test
-  COACHING_DB_USER: ubuntu
-  COACHING_DB_PASSWORD: ubuntupassword
-  COACHING_DB_HOST: localhost
+  POSTGRES_USER: ubuntu
+  POSTGRES_PASSWORD: ubuntupassword
+  POSTGRES_HOST: localhost
 
 jobs:
   test:
