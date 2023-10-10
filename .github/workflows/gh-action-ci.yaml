@@ -1,0 +1,75 @@
+name: Elixir CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  SlackChannel: '#jenkins-ci-mv-opentelemetry'
+  MIX_ENV: test
+  COACHING_DB_USER: ubuntu
+  COACHING_DB_PASSWORD: ubuntupassword
+  COACHING_DB_HOST: localhost
+
+jobs:
+  test:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    name: Test on OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    strategy:
+      # Specify the OTP and Elixir versions to use when building
+      # and running the workflow steps.
+      matrix:
+        otp: ['24.1']
+        elixir: ['1.12.3']
+    services:
+      db:
+        env:
+          POSTGRES_USER: ubuntu
+          POSTGRES_PASSWORD: ubuntupassword
+        image: postgres:12-alpine
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Erlang/OTP with Elixir and mix
+      uses: erlef/setup-beam@v1
+      with:
+        otp-version: ${{matrix.otp}}
+        elixir-version: ${{matrix.elixir}}
+
+    - name: Restore dependencies cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          deps
+          _build
+          priv/plts
+        key: ${{ runner.os }}-${{ runner.arch }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-${{ runner.arch }}-mix-
+
+    - name: Install dependencies
+      run: |
+        mix do deps.get, compile
+
+    - name: Run pre-checks
+      run: |
+        mix format --check-formatted
+        mix credo --strict
+        mix dialyzer
+
+    - name: Run mv-opentelemetry tests
+      run: |
+        mix test
