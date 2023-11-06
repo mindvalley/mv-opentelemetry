@@ -1,5 +1,7 @@
 defmodule MvOpentelemetry.EctoTest do
   use MvOpentelemetry.OpenTelemetryCase
+  alias MvOpentelemetryHarness.Page
+  alias MvOpentelemetryHarness.Repo
 
   test "sends otel events to pid" do
     MvOpentelemetry.Ecto.register_tracer(
@@ -8,7 +10,7 @@ defmodule MvOpentelemetry.EctoTest do
       default_attributes: [{"service.component", "test.harness"}]
     )
 
-    MvOpentelemetryHarness.Page.all() |> MvOpentelemetryHarness.Repo.all()
+    Page.all() |> Repo.all()
 
     assert_receive {:span, span_record}
     assert "mv_opentelemetry_harness.repo.pages" == span(span_record, :name)
@@ -25,6 +27,32 @@ defmodule MvOpentelemetry.EctoTest do
 
     :ok =
       :telemetry.detach({[:mv_opentelemetry_harness, :repo], MvOpentelemetry.Ecto, :handle_event})
+  end
+
+  test "puts stacktrace when enabled" do
+    MvOpentelemetry.Ecto.register_tracer(
+      tracer_id: :test_ecto_tracer,
+      span_prefix: [:mv_opentelemetry_harness, :repo],
+      default_attributes: [{"service.component", "test.harness"}]
+    )
+
+    config =
+      :mv_opentelemetry_harness
+      |> Application.get_env(MvOpentelemetryHarness.Repo)
+      |> then(&([stacktrace: true] ++ &1))
+
+    Repo.with_dynamic_repo(config, fn ->
+      Page.all() |> Repo.all()
+      assert_receive {:span, span_record}
+      assert {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+      assert %{"ecto.stacktrace" => stacktrace} = attributes
+      assert is_binary(stacktrace)
+    end)
+
+    assert :ok ==
+             :telemetry.detach(
+               {[:mv_opentelemetry_harness, :repo], MvOpentelemetry.Ecto, :handle_event}
+             )
   end
 
   test "raises when span_prefix is not given" do
