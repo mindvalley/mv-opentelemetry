@@ -68,7 +68,8 @@ defmodule MvOpentelemetry.Ecto do
     default_attributes = config[:default_attributes]
 
     all_attributes =
-      default_attributes ++ result ++ base_attributes ++ time_attributes(measurements)
+      default_attributes ++
+        result ++ base_attributes ++ time_attributes(measurements) ++ stacktrace_attribute(meta)
 
     span_name = name(config, event, source)
     span_opts = %{start_time: start_time, attributes: all_attributes, kind: :client}
@@ -90,6 +91,18 @@ defmodule MvOpentelemetry.Ecto do
     detach_context(parent_context)
 
     :ok
+  end
+
+  defp stacktrace_attribute(meta) do
+    case meta[:stacktrace] do
+      stacktrace when is_list(stacktrace) ->
+        [
+          {"ecto.stacktrace", inspect(stacktrace)}
+        ]
+
+      _ ->
+        []
+    end
   end
 
   defp format_error(%{__exception__: true} = exception) do
