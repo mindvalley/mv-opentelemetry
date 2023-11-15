@@ -4,13 +4,14 @@ defmodule MvOpentelemetry.AbsintheTest do
   test "sends field events when asked for it", %{conn: conn} do
     MvOpentelemetry.Absinthe.register_tracer(
       name: :test_absinthe_tracer,
+      trace_variables: true,
       default_attributes: [{"service.component", "test.harness"}],
       include_field_resolution: true
     )
 
     query = """
-    query{
-      human(id: "foo"){
+    query human($id: ID!) {
+      human(id: $id) {
         name
         id,
         pets{
@@ -20,7 +21,8 @@ defmodule MvOpentelemetry.AbsintheTest do
     }
     """
 
-    conn = post(conn, "/graphql", %{"query" => query})
+    variables = %{"id" => "foo"}
+    conn = post(conn, "/graphql", %{"query" => query, "variables" => variables})
 
     assert json_response(conn, 200) == %{
              "data" => %{
@@ -31,6 +33,10 @@ defmodule MvOpentelemetry.AbsintheTest do
                }
              }
            }
+
+    assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+    assert {"graphql.operation.variables", Jason.encode!(variables)} in attributes
 
     assert_receive {:span, span(name: "graphql.resolve.field.human") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
@@ -50,7 +56,7 @@ defmodule MvOpentelemetry.AbsintheTest do
   end
 
   test "sends only top-level events", %{conn: conn} do
-    MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_tracer)
+    MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_tracer, trace_variables: true)
 
     query = """
     query{
@@ -82,6 +88,7 @@ defmodule MvOpentelemetry.AbsintheTest do
     assert {"graphql.operation.input", query} in attributes
     assert {"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
     assert {"graphql.operation.complexity", 5} in attributes
+    assert {"graphql.operation.variables", "{}"} in attributes
 
     :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
   end
@@ -115,8 +122,10 @@ defmodule MvOpentelemetry.AbsintheTest do
 
     assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+    keys = Enum.map(attributes, fn {k, _v} -> k end)
 
     assert {"graphql.operation.input", query} in attributes
+    refute "graphql.operation.variables" in keys
     assert {"graphql.operation.complexity", nil} in attributes
     assert {"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
