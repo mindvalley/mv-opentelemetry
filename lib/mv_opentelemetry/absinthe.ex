@@ -83,8 +83,19 @@ defmodule MvOpentelemetry.Absinthe do
 
   def handle_event([:absinthe, :execute, :operation, :start], _measurements, meta, opts) do
     event_name = Enum.join([opts[:prefix]] ++ [:execute, :operation], ".")
+    variables = meta |> Access.get(:options, []) |> Keyword.get(:variables, %{})
 
-    attributes = [{"graphql.operation.input", meta.blueprint.input}] ++ opts[:default_attributes]
+    attributes =
+      [
+        {"graphql.operation.input", meta.blueprint.input}
+      ] ++ opts[:default_attributes]
+
+    attributes =
+      if opts[:trace_variables] do
+        attributes ++ [{"graphql.operation.variables", Jason.encode!(variables)}]
+      else
+        attributes
+      end
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], event_name, meta, %{})
     |> Span.set_attributes(attributes)
