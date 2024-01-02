@@ -17,5 +17,7 @@ defmodule MvOpentelemetryHarness.Page do
     |> Changeset.validate_required([:title, :body])
   end
 
-  def all, do: from p in __MODULE__, select: p
+  def all do
+    from p in __MODULE__, select: p
+  end
 end
