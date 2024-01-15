@@ -4,8 +4,8 @@ defmodule MvOpentelemetry.MixProject do
   def project do
     [
       app: :mv_opentelemetry,
-      version: "1.11.1",
-      elixir: "~> 1.7",
+      version: "1.14.0",
+      elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -54,6 +54,7 @@ defmodule MvOpentelemetry.MixProject do
       {:mv_opentelemetry_harness, path: "./mv_opentelemetry_harness", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:plug, "~> 1.0", optional: true},
+      {:phoenix_live_view, "~> 0.16", optional: true},
       {:absinthe, "~> 1.0", optional: true},
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},

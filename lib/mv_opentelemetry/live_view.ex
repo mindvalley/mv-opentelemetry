@@ -17,14 +17,27 @@ defmodule MvOpentelemetry.LiveView do
       [:phoenix, :live_component, :handle_event, :exception]
     ]
 
-  defp get_name([:phoenix, component, action, _], opts) do
-    list = [opts[:prefix]] ++ [component, action]
+  defp get_name([:phoenix, component, action, _], _opts, socket) do
+    connected = if connected?(socket), do: [:connected], else: [:disconnected]
+    list = [component] ++ connected ++ [action]
     Enum.join(list, ".")
+  end
+
+  defp connected?(socket) do
+    if function_exported?(Phoenix.LiveView, :connected?, 1) do
+      Phoenix.LiveView.connected?(socket)
+    else
+      false
+    end
   end
 
   @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
   def handle_event([:phoenix, :live_view, :mount, :start] = event, _measurements, meta, opts) do
-    attributes = [{"live_view.view", meta.socket.view}]
+    attributes = [
+      {"live_view.view", meta.socket.view},
+      {"live_view.connected", connected?(meta.socket)},
+      {"live_view.socket.id", meta.socket.id}
+    ]
 
     params_attributes =
       meta
@@ -34,7 +47,7 @@ defmodule MvOpentelemetry.LiveView do
 
     attributes = attributes ++ params_attributes ++ opts[:default_attributes]
 
-    name = get_name(event, opts)
+    name = get_name(event, opts, meta.socket)
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], name, meta, %{})
     |> Span.set_attributes(attributes)
@@ -48,7 +61,12 @@ defmodule MvOpentelemetry.LiveView do
         meta,
         opts
       ) do
-    attributes = [{"live_view.view", meta.socket.view}, {"live_view.uri", meta[:uri]}]
+    attributes = [
+      {"live_view.view", meta.socket.view},
+      {"live_view.uri", meta[:uri]},
+      {"live_view.connected", connected?(meta.socket)},
+      {"live_view.socket.id", meta.socket.id}
+    ]
 
     params_attributes =
       meta
@@ -58,7 +76,7 @@ defmodule MvOpentelemetry.LiveView do
 
     attributes = attributes ++ params_attributes ++ opts[:default_attributes]
 
-    name = get_name(event, opts)
+    name = get_name(event, opts, meta.socket)
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], name, meta, %{})
     |> Span.set_attributes(attributes)
@@ -75,10 +93,12 @@ defmodule MvOpentelemetry.LiveView do
     attributes = [
       {"live_view.view", meta.socket.view},
       {"live_view.uri", meta[:uri]},
-      {"live_view.event", meta.event}
+      {"live_view.event", meta.event},
+      {"live_view.connected", connected?(meta.socket)},
+      {"live_view.socket.id", meta.socket.id}
     ]
 
-    name = get_name(event, opts)
+    name = get_name(event, opts, meta.socket)
 
     params_attributes =
       meta
@@ -105,10 +125,12 @@ defmodule MvOpentelemetry.LiveView do
       {"live_component.event", meta.event},
       {"live_component.component", meta.component},
       {"live_component.host_uri", meta.socket.host_uri},
-      {"live_component.uri", meta[:uri]}
+      {"live_component.uri", meta[:uri]},
+      {"live_view.connected", connected?(meta.socket)},
+      {"live_view.socket.id", meta.socket.id}
     ]
 
-    name = get_name(event, opts)
+    name = get_name(event, opts, meta.socket)
 
     attributes = attributes ++ opts[:default_attributes]
 
@@ -125,7 +147,9 @@ defmodule MvOpentelemetry.LiveView do
     attributes = [
       {"live_view.kind", meta.kind},
       {"live_view.reason", meta.reason},
-      {"error", true}
+      {"error", true},
+      {"live_view.connected", connected?(meta.socket)},
+      {"live_view.socket.id", meta.socket.id}
     ]
 
     Span.set_attributes(ctx, attributes)
@@ -140,7 +164,9 @@ defmodule MvOpentelemetry.LiveView do
     attributes = [
       {"live_component.kind", meta.kind},
       {"live_component.reason", meta.reason},
-      {"error", true}
+      {"error", true},
+      {"live_view.connected", connected?(meta.socket)},
+      {"live_view.socket.id", meta.socket.id}
     ]
 
     Span.set_attributes(ctx, attributes)
