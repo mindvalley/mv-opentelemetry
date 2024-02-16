@@ -20,7 +20,7 @@ jobs:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
-    name: Test on OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    name: Test on OTP ${{ matrix.otp }} / Elixir ${{ matrix.elixir }}
     strategy:
       # Specify the OTP and Elixir versions to use when building
       # and running the workflow steps.
@@ -57,8 +57,8 @@ jobs:
             deps
             _build
             priv/plts
-          key: ${{ runner.os }}-${{ runner.arch }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-${{ runner.arch }}-mix-
+          key: ${{ runner.os }}-${{ runner.arch }}-mix-${{ matrix.elixir }}-${{ matrix.erlang }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ runner.arch }}-mix-${{ matrix.elixir }}-${{ matrix.erlang }}
 
       - name: Install dependencies
         run: |
