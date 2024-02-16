@@ -12,8 +12,7 @@ defmodule MvOpentelemetry.EctoTest do
 
     Page.all() |> Repo.all()
 
-    assert_receive {:span, span_record}
-    assert "mv_opentelemetry_harness.repo.pages" == span(span_record, :name)
+    assert_receive {:span, span(name: "mv_opentelemetry_harness.repo.pages") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
@@ -43,7 +42,7 @@ defmodule MvOpentelemetry.EctoTest do
 
     Repo.with_dynamic_repo(config, fn ->
       Page.all() |> Repo.all()
-      assert_receive {:span, span_record}
+      assert_receive {:span, span(name: "mv_opentelemetry_harness.repo.pages") = span_record}
       assert {:attributes, _, _, _, attributes} = span(span_record, :attributes)
       assert %{"ecto.stacktrace" => stacktrace} = attributes
       assert is_binary(stacktrace)

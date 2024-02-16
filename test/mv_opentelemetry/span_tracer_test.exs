@@ -10,8 +10,7 @@ defmodule MvOpentelemetry.SpanTracerTest do
       {:ok, %{result: :success}}
     end)
 
-    assert_receive {:span, span_record}
-    assert "my_event.do_stuff" == span(span_record, :name)
+    assert_receive {:span, span(name: "my_event.do_stuff") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     assert {:"my_event.name", "custom"} in attributes
     assert {:"my_event.result", :success} in attributes
@@ -26,8 +25,7 @@ defmodule MvOpentelemetry.SpanTracerTest do
       CustomSpanTracer.raise_test_error()
     rescue
       RuntimeError ->
-        assert_receive {:span, span_record}
-        assert "my_event.do_stuff" == span(span_record, :name)
+        assert_receive {:span, span(name: "my_event.do_stuff") = span_record}
         {:attributes, _, _, _, attributes} = span(span_record, :attributes)
         assert {:error, true} in attributes
         assert {:kind, :error} in attributes
