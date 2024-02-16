@@ -40,5 +40,5 @@ config :mv_opentelemetry_harness, MvOpentelemetryHarness.Repo,
   pool: Ecto.Adapters.SQL.Sandbox
 
 # Print only warnings and errors during test
-config :logger, level: :warn
+config :logger, level: :warning
 config :phoenix, :json_library, Jason
