@@ -26,7 +26,7 @@ jobs:
       # and running the workflow steps.
       matrix:
         otp: ["25.2", "26.2"]
-        elixir: ["1.15.6", "1.14.5"]
+        elixir: ["1.15.6", "1.16.1"]
     services:
       db:
         env:
@@ -57,8 +57,8 @@ jobs:
             deps
             _build
             priv/plts
-          key: ${{ runner.os }}-${{ runner.arch }}-mix-${{ matrix.elixir }}-${{ matrix.erlang }}-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-${{ runner.arch }}-mix-${{ matrix.elixir }}-${{ matrix.erlang }}
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ runner.arch }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix
 
       - name: Install dependencies
         run: |
