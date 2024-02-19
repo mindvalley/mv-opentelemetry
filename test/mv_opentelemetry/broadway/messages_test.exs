@@ -12,35 +12,9 @@ defmodule MvOpentelemetry.Broadway.MessagesTest do
     BroadwayDummy.start_link()
     ref = BroadwayDummy.test_message(1)
     assert_receive {:ack, ^ref, [%{data: 1}], []}
-    assert_receive {:span, span_record_1}
-    assert_receive {:span, span_record_2}
-
-    assert Enum.member?(
-             ["broadway.processor.start", "broadway.processor.message.start"],
-             span(span_record_1, :name)
-           )
-
-    assert Enum.member?(
-             ["broadway.processor.start", "broadway.processor.message.start"],
-             span(span_record_2, :name)
-           )
-
-    case span(span_record_1, :name) do
-      "broadway.processor.start" ->
-        validate_processor_attributes(span_record_1)
-
-      _ ->
-        :ok
-    end
-
-    case span(span_record_2, :name) do
-      "broadway.processor.start" ->
-        validate_processor_attributes(span_record_2)
-
-      _ ->
-        :ok
-    end
-
+    assert_receive {:span, span(name: "broadway.processor.start") = processor_start_span}
+    assert_receive {:span, span(name: "broadway.processor.message.start")}
+    validate_processor_attributes(processor_start_span)
     :ok = :telemetry.detach({:test_broadway_tracer, MvOpentelemetry.Broadway.Messages})
   end
 
