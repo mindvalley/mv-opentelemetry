@@ -39,7 +39,7 @@ defmodule MvOpentelemetryHarness.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.16.0"},
+      {:phoenix_live_view, "~> 0.18.0"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.0"},

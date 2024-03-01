@@ -54,7 +54,7 @@ defmodule MvOpentelemetry.MixProject do
       {:mv_opentelemetry_harness, path: "./mv_opentelemetry_harness", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:plug, "~> 1.0", optional: true},
-      {:phoenix_live_view, "~> 0.16", optional: true},
+      {:phoenix_live_view, "~> 0.18", optional: true},
       {:absinthe, "~> 1.0", optional: true},
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
