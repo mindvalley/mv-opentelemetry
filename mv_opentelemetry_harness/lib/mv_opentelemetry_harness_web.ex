@@ -44,7 +44,7 @@ defmodule MvOpentelemetryHarnessWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {MvOpentelemetryHarnessWeb.LayoutView, "live.html"}
+        layout: {MvOpentelemetryHarnessWeb.LayoutView, :live}
 
       unquote(view_helpers())
     end
