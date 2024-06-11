@@ -33,7 +33,7 @@ defmodule MvOpentelemetryHarnessWeb.Endpoint do
     plug Phoenix.Ecto.CheckRepoStatus, otp_app: :mv_opentelemetry_harness
   end
 
-  plug Plug.RequestId
+  plug Plug.RequestId, assign_as: :plug_request_id
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
   plug Plug.Parsers,
