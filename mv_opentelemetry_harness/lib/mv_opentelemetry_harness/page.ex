@@ -1,6 +1,6 @@
 defmodule MvOpentelemetryHarness.Page do
   use Ecto.Schema
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query, only: [from: 2, subquery: 1]
   alias Ecto.Changeset
 
   schema "pages" do
@@ -19,5 +19,9 @@ defmodule MvOpentelemetryHarness.Page do
 
   def all do
     from p in __MODULE__, select: p
+  end
+
+  def custom_query do
+    from p in subquery(all()), select: %{title: p.title, id: p.id}
   end
 end

@@ -3,6 +3,32 @@ defmodule MvOpentelemetry.EctoTest do
   alias MvOpentelemetryHarness.Page
   alias MvOpentelemetryHarness.Repo
 
+  test "custom query has no" do
+    MvOpentelemetry.Ecto.register_tracer(
+      tracer_id: :test_ecto_tracer,
+      span_prefix: [:mv_opentelemetry_harness, :repo],
+      default_attributes: [{"service.component", "test.harness"}]
+    )
+
+    Page.custom_query() |> Repo.all()
+
+    assert_receive {:span, span(name: "mv_opentelemetry_harness.repo") = span_record}
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+    keys = Enum.map(attributes, fn {k, _v} -> k end)
+
+    assert {"db.type", :sql} in attributes
+    assert {"service.component", "test.harness"} in attributes
+    assert {"db.source", nil} in attributes
+
+    assert "db.statement" in keys
+    assert "db.instance" in keys
+    assert "db.url" in keys
+    assert "db.total_time_microseconds" in keys
+
+    :ok =
+      :telemetry.detach({[:mv_opentelemetry_harness, :repo], MvOpentelemetry.Ecto, :handle_event})
+  end
+
   test "sends otel events to pid" do
     MvOpentelemetry.Ecto.register_tracer(
       tracer_id: :test_ecto_tracer,

@@ -19,6 +19,9 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      pull-requests: write
+      checks: write
+
     runs-on: ubuntu-latest
     name: Test on OTP ${{ matrix.otp }} / Elixir ${{ matrix.elixir }}
     strategy:
@@ -72,4 +75,15 @@ jobs:
 
       - name: Run mv-opentelemetry tests
         run: |
-          mix test
+          mix test --cover
+
+      - name: Test coverage
+        uses: mindvalley/cobertura-action@master
+        with:
+          path: "mv_opentelemetry.covertool.xml"
+          minimum_coverage: 74
+          report_name: "Test coverage: Elixir ${{matrix.elixir}} / OTP ${{matrix.otp}}"
+          show_missing: true
+          link_missing_lines: true
+          only_changed_files: true
+          link_missing_lines_source_dir: lib
