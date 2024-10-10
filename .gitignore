@@ -24,3 +24,5 @@ mv_opentelemetry-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+*.covertool.xml

@@ -11,6 +11,7 @@ defmodule MvOpentelemetry.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      test_coverage: [tool: :covertool],
       dialyzer: [
         plt_add_apps: [:mix, :ex_unit],
         ignore_warnings: ".known_dialyzer_warnings",
@@ -59,7 +60,8 @@ defmodule MvOpentelemetry.MixProject do
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:bypass, "~> 2.1", only: [:test]}
+      {:bypass, "~> 2.1", only: [:test]},
+      {:covertool, "~> 2.0", only: [:test]}
     ]
   end
 
