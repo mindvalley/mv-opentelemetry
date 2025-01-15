@@ -22,7 +22,6 @@ defmodule MvOpentelemetry.ObanTest do
     assert {:"messaging.system", :oban} in attributes
     assert {:"messaging.oban.attempt", 1} in attributes
     assert {:"messaging.destination", "events"} in attributes
-    assert {:"messaging.destination_kind", :queue} in attributes
     assert {:"messaging.oban.priority", 0} in attributes
     assert {:"messaging.oban.inserted_at", nil} in attributes
     assert {:"messaging.system", :oban} in attributes

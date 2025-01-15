@@ -34,7 +34,6 @@ defmodule MvOpentelemetry.Oban do
     attributes = [
       {Trace.messaging_system(), :oban},
       {Trace.messaging_destination(), queue},
-      {Trace.messaging_destination_kind(), :queue},
       {Trace.messaging_operation(), :process},
       {:"messaging.oban.job_id", id},
       {:"messaging.oban.worker", worker},
