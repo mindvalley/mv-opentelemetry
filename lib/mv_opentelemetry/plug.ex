@@ -68,8 +68,6 @@ defmodule MvOpentelemetry.Plug do
 
     attributes = [
       {Trace.http_client_ip(), client_ip},
-      # Remove this field after some time in favour of Trace.net_peer_name()
-      {:"http.host", conn.host},
       {Trace.net_peer_name(), conn.host},
       {Trace.http_method(), conn.method},
       {Trace.http_scheme(), "#{conn.scheme}"},
@@ -110,11 +108,7 @@ defmodule MvOpentelemetry.Plug do
   def handle_stop_event(_, _, %{conn: conn} = meta, opts) do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
 
-    Span.set_attributes(ctx, %{
-      # Remove this field after some time in favour of Trace.http_status_code()
-      :"http.status" => conn.status,
-      Trace.http_status_code() => conn.status
-    })
+    Span.set_attributes(ctx, %{Trace.http_status_code() => conn.status})
 
     if conn.status >= 400 do
       Span.set_status(ctx, OpenTelemetry.status(:error, ""))

@@ -16,11 +16,9 @@ defmodule MvOpentelemetry.PlugTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
-    assert {:"http.status", 200} in attributes
     assert {:"http.status_code", 200} in attributes
     assert {:"http.method", "GET"} in attributes
     assert {:"http.flavor", ""} in attributes
-    assert {:"http.host", "www.example.com"} in attributes
     assert {:"net.peer.name", "www.example.com"} in attributes
     assert {:"http.target", "/"} in attributes
     assert {"service.component", "test.harness"} in attributes
@@ -77,7 +75,6 @@ defmodule MvOpentelemetry.PlugTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
-    assert {:"http.status", 200} in attributes
     assert {:"http.status_code", 200} in attributes
     assert {:"http.method", "GET"} in attributes
     assert {:"http.flavor", ""} in attributes
