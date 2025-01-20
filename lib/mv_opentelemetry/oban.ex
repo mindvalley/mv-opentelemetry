@@ -1,8 +1,8 @@
 defmodule MvOpentelemetry.Oban do
   @moduledoc false
 
+  alias OpenTelemetry.SemConv.Incubating
   alias OpenTelemetry.Span
-  require OpenTelemetry.SemanticConventions.Trace, as: Trace
 
   use MvOpentelemetry.SpanTracer,
     name: :oban,
@@ -32,9 +32,9 @@ defmodule MvOpentelemetry.Oban do
       end
 
     attributes = [
-      {Trace.messaging_system(), :oban},
-      {Trace.messaging_destination(), queue},
-      {Trace.messaging_operation(), :process},
+      {Incubating.MessagingAttributes.messaging_system(), :oban},
+      {Incubating.MessagingAttributes.messaging_operation(), :process},
+      {:"messaging.destination", queue},
       {:"messaging.oban.job_id", id},
       {:"messaging.oban.worker", worker},
       {:"messaging.oban.priority", priority},
