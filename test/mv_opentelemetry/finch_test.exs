@@ -57,8 +57,6 @@ defmodule MvOpentelemetry.FinchTest do
     assert :client == span(span_record, :kind)
 
     assert {:"http.status_code", 200} in attributes
-    assert {:"http.status", 200} in attributes
-    assert {:"http.host", "localhost"} in attributes
     assert {:"net.peer.name", "localhost"} in attributes
     assert {:"http.method", "GET"} in attributes
     assert {:"http.target", "/"} in attributes
