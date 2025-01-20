@@ -9,7 +9,7 @@ defmodule MvOpentelemetry.Tesla do
       [:tesla, :request, :exception]
     ]
 
-  require OpenTelemetry.SemanticConventions.Trace, as: Trace
+  alias OpenTelemetry.SemConv.Incubating
 
   def handle_event([:tesla, :request, :start], _measurements, meta, opts) do
     %{
@@ -24,13 +24,13 @@ defmodule MvOpentelemetry.Tesla do
     method = String.upcase(Atom.to_string(method))
 
     tesla_attributes = [
-      {Trace.http_method(), method},
-      {Trace.http_scheme(), scheme},
+      {Incubating.HTTPAttributes.http_method(), method},
+      {Incubating.HTTPAttributes.http_scheme(), scheme},
       {:"http.host", host},
-      {Trace.net_peer_name(), host},
-      {Trace.net_peer_port(), port},
-      {Trace.http_target(), path},
-      {Trace.http_url(), url_string}
+      {Incubating.NetworkAttributes.net_peer_name(), host},
+      {Incubating.NetworkAttributes.net_peer_port(), port},
+      {Incubating.HTTPAttributes.http_target(), path},
+      {Incubating.HTTPAttributes.http_url(), url_string}
     ]
 
     attributes = opts[:default_attributes] ++ tesla_attributes
@@ -62,7 +62,7 @@ defmodule MvOpentelemetry.Tesla do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
 
     if status do
-      Span.set_attributes(ctx, %{Trace.http_status_code() => status})
+      Span.set_attributes(ctx, %{Incubating.HTTPAttributes.http_status_code() => status})
     end
 
     if error do
@@ -71,7 +71,11 @@ defmodule MvOpentelemetry.Tesla do
     end
 
     if content_length do
-      Span.set_attribute(ctx, Trace.http_response_content_length(), content_length)
+      Span.set_attribute(
+        ctx,
+        Incubating.HTTPAttributes.http_response_content_length(),
+        content_length
+      )
     end
 
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
