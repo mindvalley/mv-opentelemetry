@@ -28,8 +28,8 @@ jobs:
       # Specify the OTP and Elixir versions to use when building
       # and running the workflow steps.
       matrix:
-        otp: ["25.2", "26.2"]
-        elixir: ["1.15.6", "1.16.1"]
+        otp: ["26.2", "27.2"]
+        elixir: ["1.16", "1.17", "1.18"]
     services:
       db:
         env:
