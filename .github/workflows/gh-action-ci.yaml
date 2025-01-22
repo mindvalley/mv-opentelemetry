@@ -29,7 +29,7 @@ jobs:
       # and running the workflow steps.
       matrix:
         otp: ["26.2", "27.2"]
-        elixir: ["1.16", "1.17", "1.18"]
+        elixir: ["1.17", "1.18"]
     services:
       db:
         env:
