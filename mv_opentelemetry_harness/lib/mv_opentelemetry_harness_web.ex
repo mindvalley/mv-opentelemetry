@@ -44,7 +44,7 @@ defmodule MvOpentelemetryHarnessWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {MvOpentelemetryHarnessWeb.LayoutView, "live.html"}
+        layout: {MvOpentelemetryHarnessWeb.LayoutView, :live}
 
       unquote(view_helpers())
     end
@@ -76,11 +76,9 @@ defmodule MvOpentelemetryHarnessWeb do
 
   defp view_helpers do
     quote do
-      # Use all HTML functionality (forms, tags, etc)
-      use Phoenix.HTML
-
-      # Import basic rendering functionality (render, render_layout, etc)
-      import Phoenix.View
+      import Phoenix.HTML
+      import Phoenix.HTML.Form
+      use PhoenixHTMLHelpers
 
       import MvOpentelemetryHarnessWeb.ErrorHelpers
       alias MvOpentelemetryHarnessWeb.Router.Helpers, as: Routes

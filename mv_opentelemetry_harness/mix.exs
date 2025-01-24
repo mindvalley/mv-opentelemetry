@@ -7,7 +7,7 @@ defmodule MvOpentelemetryHarness.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix] ++ Mix.compilers(),
+      compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -37,9 +37,11 @@ defmodule MvOpentelemetryHarness.MixProject do
       {:phoenix_ecto, "~> 4.1"},
       {:ecto_sql, "~> 3.4"},
       {:postgrex, ">= 0.0.0"},
-      {:phoenix_html, "~> 3.0"},
+      {:phoenix_html, "~> 4.0"},
+      {:phoenix_html_helpers, "~> 1.0"},
+      {:phoenix_view, "~> 2.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.16.0"},
+      {:phoenix_live_view, "~> 1.0"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.0"},
@@ -49,7 +51,7 @@ defmodule MvOpentelemetryHarness.MixProject do
       # Absinthe
       {:absinthe, "~> 1.6"},
       {:absinthe_plug, "~> 1.5"},
-      {:dataloader, "~> 1.0.0"},
+      {:dataloader, "~> 1.0 or ~> 2.0"},
 
       # Oban
       {:oban, "~> 2.0"},
