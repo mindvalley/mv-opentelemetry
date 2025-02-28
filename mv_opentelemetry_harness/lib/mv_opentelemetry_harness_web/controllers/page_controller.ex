@@ -10,4 +10,16 @@ defmodule MvOpentelemetryHarnessWeb.PageController do
 
     render(conn, "index.html", pages: pages)
   end
+
+  def show(%{path_info: ["timeout"]} = conn, _params) do
+    :timer.sleep(1000)
+    query = from p in Page, select: p
+    pages = Repo.all(query)
+
+    render(conn, "index.html", pages: pages)
+  end
+
+  def show(%{path_info: ["500"]}, _params) do
+    raise "500"
+  end
 end

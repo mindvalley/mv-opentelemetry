@@ -33,6 +33,8 @@ defmodule MvOpentelemetryHarnessWeb.Router do
 
     live "/live", LiveLive
     get "/", PageController, :index
+    get "/500", PageController, :show
+    get "/timeout", PageController, :show
   end
 
   # Other scopes may use custom stacks.

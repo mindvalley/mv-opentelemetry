@@ -1,7 +1,6 @@
 defmodule MvOpentelemetry.TeslaTest do
-  use MvOpentelemetry.OpenTelemetryCase
+  use MvOpentelemetry.OpenTelemetryCase, async: false
 
-  alias MvOpentelemetryHarnessWeb.Router.Helpers, as: Routes
   require OpenTelemetry.Tracer, as: Tracer
 
   def setup_bypass(_) do
@@ -26,29 +25,25 @@ defmodule MvOpentelemetry.TeslaTest do
   describe "get_content_length/1" do
     test "handles 'content-length' header" do
       result = {:ok, %{headers: [{"content-length", "123"}]}}
-      assert MvOpentelemetry.Tesla.get_content_length(result) == 123
+      expected_response = %{"http.response.header.content-length": ["123"]}
+      assert MvOpentelemetry.Tesla.get_content_length(result) == expected_response
     end
 
     test "handles missing 'content-length' header" do
       result = {:ok, %{headers: []}}
-      assert MvOpentelemetry.Tesla.get_content_length(result) == nil
-    end
-
-    test "handles invalid 'content-length' header" do
-      result = {:ok, %{headers: [{"content-length", "abc"}]}}
-      assert MvOpentelemetry.Tesla.get_content_length(result) == nil
+      assert MvOpentelemetry.Tesla.get_content_length(result) == %{}
     end
 
     test "handles error case" do
       result = :yeet
-      assert MvOpentelemetry.Tesla.get_content_length(result) == nil
+      assert MvOpentelemetry.Tesla.get_content_length(result) == %{}
     end
   end
 
   test "emits events on success", %{bypass: bypass, bypass_url: bypass_url, tesla_client: client} do
     MvOpentelemetry.Tesla.register_tracer(
       name: :test_tesla_tracer,
-      default_attributes: [{"service.component", "test.harness"}]
+      default_attributes: [{"service.component", "tesla.harness"}]
     )
 
     Bypass.expect(bypass, fn conn ->
@@ -57,16 +52,17 @@ defmodule MvOpentelemetry.TeslaTest do
 
     Tesla.get(client, "/")
 
-    assert_receive {:span, span(name: "HTTP GET") = span_record}
+    assert_receive {:span, span(name: "GET") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert :client == span(span_record, :kind)
 
-    assert {:"http.status_code", 200} in attributes
-    assert {:"http.method", "GET"} in attributes
-    assert {:"http.target", "/"} in attributes
-    assert {:"http.url", bypass_url} in attributes
-    assert {"service.component", "test.harness"} in attributes
+    assert {:"http.response.status_code", 200} in attributes
+    assert {:"server.address", "localhost"} in attributes
+    assert {:"http.request.method", "GET"} in attributes
+    assert {:"url.path", "/"} in attributes
+    assert {:"url.full", bypass_url} in attributes
+    assert {"service.component", "tesla.harness"} in attributes
 
     :ok = :telemetry.detach({:test_tesla_tracer, MvOpentelemetry.Tesla})
   end
@@ -78,7 +74,7 @@ defmodule MvOpentelemetry.TeslaTest do
   } do
     MvOpentelemetry.Tesla.register_tracer(
       name: :test_tesla_tracer,
-      default_attributes: [{"service.component", "test.harness"}]
+      default_attributes: [{"service.component", "tesla.harness"}]
     )
 
     Bypass.expect(bypass, fn conn ->
@@ -95,15 +91,16 @@ defmodule MvOpentelemetry.TeslaTest do
     end
 
     assert_receive {:span, span(name: "root span") = span_record}
-    assert_receive {:span, span(name: "HTTP GET") = child_span_record}
+    assert_receive {:span, span(name: "GET") = child_span_record}
     {:attributes, _, _, _, attributes} = span(child_span_record, :attributes)
 
     assert :client == span(child_span_record, :kind)
-    assert {:"http.status_code", 200} in attributes
-    assert {:"http.method", "GET"} in attributes
-    assert {:"http.target", "/"} in attributes
-    assert {:"http.url", bypass_url} in attributes
-    assert {"service.component", "test.harness"} in attributes
+    assert {:"http.response.status_code", 200} in attributes
+    assert {:"server.address", "localhost"} in attributes
+    assert {:"http.request.method", "GET"} in attributes
+    assert {:"url.path", "/"} in attributes
+    assert {:"url.full", bypass_url} in attributes
+    assert {"service.component", "tesla.harness"} in attributes
 
     assert span(span_record, :span_id) == span(child_span_record, :parent_span_id)
 
@@ -113,25 +110,27 @@ defmodule MvOpentelemetry.TeslaTest do
   test "emits events on failure", %{tesla_client: client} do
     MvOpentelemetry.Tesla.register_tracer(
       name: :test_tesla_tracer,
-      default_attributes: [{"service.component", "test.harness"}]
+      default_attributes: [{"service.component", "tesla.harness"}]
     )
 
-    url = Routes.page_url(MvOpentelemetryHarnessWeb.Endpoint, :index)
+    path = "/potato/#{System.unique_integer([:positive])}"
+    url = "http://localhost:10000" <> path
 
     Tesla.get(client, url)
 
-    assert_receive {:span, span(name: "HTTP GET") = span_record}
+    assert_receive {:span, span(name: "GET") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert :client == span(span_record, :kind)
 
     keys = Enum.map(attributes, fn {k, _} -> k end)
 
-    refute :"http.status_code" in keys
-    assert {:"http.method", "GET"} in attributes
-    assert {:"http.target", "/"} in attributes
-    assert {:"http.url", url} in attributes
-    assert {"service.component", "test.harness"} in attributes
+    refute :"http.response.status_code" in keys
+    assert {:"server.address", "localhost"} in attributes
+    assert {:"http.request.method", "GET"} in attributes
+    assert {:"url.path", path} in attributes
+    assert {:"url.full", url} in attributes
+    assert {"service.component", "tesla.harness"} in attributes
 
     :ok = :telemetry.detach({:test_tesla_tracer, MvOpentelemetry.Tesla})
   end

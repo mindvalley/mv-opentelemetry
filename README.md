@@ -18,7 +18,8 @@ Somewhere in your application startup, for example in Application.start/2:
 def start(_type, _args) do
   :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :repo])
   :ok = MvOpentelemetry.register_tracer(:ecto, span_prefix: [:my_app, :replica_repo])
-  :ok = MvOpentelemetry.register_tracer(:plug)
+  :ok = MvOpentelemetry.register_tracer(:cowboy)
+  :ok = MvOpentelemetry.register_tracer(:plug, adapter: cowboy)
   :ok = MvOpentelemetry.register_tracer(:live_view)
   :ok = MvOpentelemetry.register_tracer(:absinthe)
   :ok = MvOpentelemetry.register_tracer(:dataloader)
@@ -34,7 +35,7 @@ which can send data to any OTLP enabled collector.
 ```elixir
 def deps do
   [
-    {:mv_opentelemetry, github: "mindvalley/mv-opentelemetry", tag: "v1.5.0"},
+    {:mv_opentelemetry, github: "mindvalley/mv-opentelemetry", tag: "v3.0.0"},
     {:opentelemetry_exporter, "~> 1.0.0"},
   ]
 end

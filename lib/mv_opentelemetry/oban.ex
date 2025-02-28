@@ -1,6 +1,7 @@
 defmodule MvOpentelemetry.Oban do
   @moduledoc false
 
+  alias OpenTelemetry.SemConv
   alias OpenTelemetry.SemConv.Incubating
   alias OpenTelemetry.Span
 
@@ -33,7 +34,8 @@ defmodule MvOpentelemetry.Oban do
 
     attributes = [
       {Incubating.MessagingAttributes.messaging_system(), :oban},
-      {Incubating.MessagingAttributes.messaging_operation(), :process},
+      {Incubating.MessagingAttributes.messaging_operation_type(),
+       Incubating.MessagingAttributes.messaging_operation_type_values().process},
       {:"messaging.destination", queue},
       {:"messaging.oban.job_id", id},
       {:"messaging.oban.worker", worker},
@@ -41,7 +43,9 @@ defmodule MvOpentelemetry.Oban do
       {:"messaging.oban.attempt", attempt},
       {:"messaging.oban.max_attempts", max_attempts},
       {:"messaging.oban.inserted_at", inserted_at_string},
-      {:"messaging.oban.scheduled_at", DateTime.to_iso8601(scheduled_at)}
+      {:"messaging.oban.scheduled_at", DateTime.to_iso8601(scheduled_at)},
+      {SemConv.OtelAttributes.otel_scope_name(), :mv_opentelemetry},
+      {SemConv.OtelAttributes.otel_scope_version(), MvOpentelemetry.version()}
     ]
 
     attributes = opts[:default_attributes] ++ attributes
