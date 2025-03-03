@@ -9,7 +9,7 @@ defmodule MvOpentelemetry.Tesla do
       [:tesla, :request, :exception]
     ]
 
-  alias OpenTelemetry.SemConv.Incubating
+  alias OpenTelemetry.SemConv
 
   def handle_event([:tesla, :request, :start], _measurements, meta, opts) do
     %{
@@ -24,17 +24,18 @@ defmodule MvOpentelemetry.Tesla do
     method = String.upcase(Atom.to_string(method))
 
     tesla_attributes = [
-      {Incubating.HTTPAttributes.http_method(), method},
-      {Incubating.HTTPAttributes.http_scheme(), scheme},
-      {:"http.host", host},
-      {Incubating.NetworkAttributes.net_peer_name(), host},
-      {Incubating.NetworkAttributes.net_peer_port(), port},
-      {Incubating.HTTPAttributes.http_target(), path},
-      {Incubating.HTTPAttributes.http_url(), url_string}
+      {SemConv.HTTPAttributes.http_request_method(), method},
+      {SemConv.URLAttributes.url_scheme(), scheme},
+      {SemConv.ServerAttributes.server_address(), host},
+      {SemConv.ServerAttributes.server_port(), port},
+      {SemConv.URLAttributes.url_path(), path},
+      {SemConv.URLAttributes.url_full(), url_string},
+      {SemConv.OtelAttributes.otel_scope_name(), :mv_opentelemetry},
+      {SemConv.OtelAttributes.otel_scope_version(), MvOpentelemetry.version()}
     ]
 
     attributes = opts[:default_attributes] ++ tesla_attributes
-    span_name = "HTTP #{method}"
+    span_name = "#{method}"
 
     parent_context = OpentelemetryProcessPropagator.fetch_parent_ctx(2, :"$callers")
     attach_context(parent_context)
@@ -49,33 +50,19 @@ defmodule MvOpentelemetry.Tesla do
   end
 
   def handle_event([:tesla, :request, :stop], _measurements, meta, opts) do
-    %{
-      env: %{
-        body: body,
-        status: status
-      }
-    } = meta
-
-    error = get_error(body)
-    content_length = get_content_length(body)
-
+    %{env: env} = meta
+    content_length = get_content_length(env)
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
+    Span.set_attributes(ctx, content_length)
+    error = get_error(env.body)
 
-    if status do
-      Span.set_attributes(ctx, %{Incubating.HTTPAttributes.http_status_code() => status})
+    if env.status do
+      Span.set_attributes(ctx, %{SemConv.HTTPAttributes.http_response_status_code() => env.status})
     end
 
     if error do
       error_status = OpenTelemetry.status(:error, error)
       Span.set_status(ctx, error_status)
-    end
-
-    if content_length do
-      Span.set_attribute(
-        ctx,
-        Incubating.HTTPAttributes.http_response_content_length(),
-        content_length
-      )
     end
 
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
@@ -92,12 +79,12 @@ defmodule MvOpentelemetry.Tesla do
   defp get_error(_), do: nil
 
   def get_content_length(result) do
-    with {:ok, %{headers: headers}} <- result,
-         length <- :proplists.get_value("content-length", headers, ""),
-         {int, ""} <- Integer.parse(length) do
-      int
-    else
-      _ -> nil
+    case result do
+      {:ok, %{headers: headers}} ->
+        :otel_http.extract_headers_attributes(:response, headers, ["content-length"])
+
+      _ ->
+        %{}
     end
   end
 end

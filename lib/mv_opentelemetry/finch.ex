@@ -9,7 +9,7 @@ defmodule MvOpentelemetry.Finch do
       [:finch, :request, :exception]
     ]
 
-  alias OpenTelemetry.SemConv.Incubating
+  alias OpenTelemetry.SemConv
 
   def handle_event([:finch, :request, :start], _measurements, meta, opts) do
     %{
@@ -23,16 +23,18 @@ defmodule MvOpentelemetry.Finch do
     } = meta
 
     finch_attributes = [
-      {Incubating.HTTPAttributes.http_method(), method},
-      {Incubating.HTTPAttributes.http_scheme(), scheme},
-      {Incubating.NetworkAttributes.net_peer_name(), host},
-      {Incubating.NetworkAttributes.net_peer_port(), port},
-      {Incubating.HTTPAttributes.http_target(), path},
-      {Incubating.HTTPAttributes.http_url(), build_url(scheme, host, port, path)}
+      {SemConv.HTTPAttributes.http_request_method(), method},
+      {SemConv.URLAttributes.url_scheme(), scheme},
+      {SemConv.ServerAttributes.server_address(), host},
+      {SemConv.ServerAttributes.server_port(), port},
+      {SemConv.URLAttributes.url_path(), path},
+      {SemConv.URLAttributes.url_full(), build_url(scheme, host, port, path)},
+      {SemConv.OtelAttributes.otel_scope_name(), :mv_opentelemetry},
+      {SemConv.OtelAttributes.otel_scope_version(), MvOpentelemetry.version()}
     ]
 
     attributes = opts[:default_attributes] ++ finch_attributes
-    span_name = "HTTP #{method}"
+    span_name = "#{method}"
 
     OpentelemetryTelemetry.start_telemetry_span(opts[:tracer_id], span_name, meta, %{
       attributes: attributes,
@@ -45,27 +47,19 @@ defmodule MvOpentelemetry.Finch do
   def handle_event([:finch, :request, :stop], _measurements, meta, opts) do
     %{result: result} = meta
 
+    content_length = get_content_length(result)
+    ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
+    Span.set_attributes(ctx, content_length)
     status = get_status(result)
     error = get_error(result)
-    content_length = get_content_length(result)
-
-    ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
 
     if status do
-      Span.set_attributes(ctx, %{Incubating.HTTPAttributes.http_status_code() => status})
+      Span.set_attributes(ctx, %{SemConv.HTTPAttributes.http_response_status_code() => status})
     end
 
     if error do
       error_status = OpenTelemetry.status(:error, error)
       Span.set_status(ctx, error_status)
-    end
-
-    if content_length do
-      Span.set_attribute(
-        ctx,
-        Incubating.HTTPAttributes.http_response_content_length(),
-        content_length
-      )
     end
 
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
@@ -91,12 +85,12 @@ defmodule MvOpentelemetry.Finch do
   defp get_error(_), do: nil
 
   def get_content_length(result) do
-    with {:ok, %{headers: headers}} <- result,
-         length <- :proplists.get_value("content-length", headers, ""),
-         {int, ""} <- Integer.parse(length) do
-      int
-    else
-      _ -> nil
+    case result do
+      {:ok, %{headers: headers}} ->
+        :otel_http.extract_headers_attributes(:response, headers, ["content-length"])
+
+      _ ->
+        %{}
     end
   end
 

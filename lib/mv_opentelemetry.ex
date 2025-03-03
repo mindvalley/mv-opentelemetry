@@ -46,7 +46,7 @@ defmodule MvOpentelemetry do
 
   @doc """
   Registers tracer for given functional area with options.
-  Allowed areas are: :absinthe, :broadway, :dataloader, :ecto, :live_view, :oban and :phoenix.
+  Allowed areas are: :absinthe, :cowboy, :broadway, :dataloader, :ecto, :live_view, :oban and :plug.
   You can also provide following options:
 
   ## Ecto
@@ -76,12 +76,19 @@ defmodule MvOpentelemetry do
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
       from this group, for example [{"service.component", "ecto"}]. Defaults to []
 
+  ## Cowboy
+  This is a shallow wrapper for opentelemetry_cowboy. It accepts the same options as
+  opentelemetry_cowboy:setup/1 with the following extra defaults:
+  - public_endpoint: false
+  - request_headers: ["referer"]
+  - response_headers: ["x-request-id"]
+
   ## Plug
+  NB! Requires cowboy tracer being set up! Then accepts the following options:
+
+    - `adapter` REQUIRED argument to identify which server you are running. Currently only supports
+      `cowboy`, which is also the default one.
     - `span_prefix` OPTIONAL telemetry prefix to listen to. Defaults to [:phoenix, :endpoint]
-    - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
-      from this group, for example [{"service.component", "ecto"}]. Defaults to []
-    - `query_params_whitelist` OPTIONAL list of query param names you want to allow to log in your
-      traces, i.e ["user_id", "product_id"]. Defaults to logging all.
 
   ## Broadway
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
@@ -102,6 +109,7 @@ defmodule MvOpentelemetry do
 
   @spec register_tracer(traced_apps(), Access.t()) :: :ok
   def register_tracer(:absinthe, opts), do: __MODULE__.Absinthe.register_tracer(opts)
+  def register_tracer(:cowboy, opts), do: __MODULE__.Cowboy.register_tracer(opts)
   def register_tracer(:broadway, opts), do: __MODULE__.Broadway.Messages.register_tracer(opts)
   def register_tracer(:dataloader, opts), do: __MODULE__.Dataloader.register_tracer(opts)
   def register_tracer(:ecto, opts), do: __MODULE__.Ecto.register_tracer(opts)
@@ -110,4 +118,6 @@ defmodule MvOpentelemetry do
   def register_tracer(:oban, opts), do: __MODULE__.Oban.register_tracer(opts)
   def register_tracer(:plug, opts), do: __MODULE__.Plug.register_tracer(opts)
   def register_tracer(:tesla, opts), do: __MODULE__.Tesla.register_tracer(opts)
+
+  def version, do: "3.0.0"
 end

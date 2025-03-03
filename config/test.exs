@@ -16,7 +16,7 @@ config :mv_opentelemetry_harness, MvOpentelemetryHarnessWeb.Endpoint,
   pubsub_server: MvOpentelemetryHarness.PubSub,
   live_view: [signing_salt: "n4EZeui4"],
   http: [port: 4002],
-  server: false
+  server: true
 
 # Configures Elixir's Logger
 config :logger, :console,
