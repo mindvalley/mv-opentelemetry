@@ -116,6 +116,12 @@ defmodule MvOpentelemetry.Absinthe do
 
   def handle_event([:absinthe, :execute, :operation, :stop], _measurements, meta, opts) do
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
+    current_user = get_in(meta, [:options, :context, :current_user])
+
+    current_user_uid =
+      if is_map(current_user) do
+        Map.get(current_user, :uid)
+      end
 
     complexity =
       with true <- function_exported?(Absinthe.Blueprint, :current_operation, 1),
@@ -127,7 +133,8 @@ defmodule MvOpentelemetry.Absinthe do
 
     attributes = [
       {"graphql.operation.schema", meta.blueprint.schema},
-      {"graphql.operation.complexity", complexity}
+      {"graphql.operation.complexity", complexity},
+      {"auth0_user_id", current_user_uid}
     ]
 
     Span.set_attributes(ctx, attributes)
