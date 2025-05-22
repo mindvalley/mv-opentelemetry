@@ -15,6 +15,7 @@ defmodule MvOpentelemetryHarnessWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug MvOpentelemetryHarnessWeb.Plug.CurrentUser
   end
 
   scope "/" do

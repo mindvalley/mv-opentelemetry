@@ -93,6 +93,113 @@ defmodule MvOpentelemetry.AbsintheTest do
     :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
   end
 
+  describe "auth0_user_id" do
+    test "when current_user is set in context, adds an attribute", %{conn: conn} do
+      MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_tracer)
+
+      query = """
+      query{
+        human(id: "foo"){
+          name
+          id,
+          pets{
+            name
+          }
+        }
+      }
+      """
+
+      conn = put_req_header(conn, "authorization", "auth0|test_user_id")
+      conn = post(conn, "/graphql", %{"query" => query})
+
+      assert json_response(conn, 200) == %{
+               "data" => %{
+                 "human" => %{
+                   "id" => "foo",
+                   "name" => "Stephen",
+                   "pets" => [%{"name" => "Pinky"}, %{"name" => "Brain"}]
+                 }
+               }
+             }
+
+      assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
+      {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+
+      assert {"auth0_user_id", "auth0|test_user_id"} in attributes
+      :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
+    end
+
+    test "when current_user is misssing, attribute is null", %{conn: conn} do
+      MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_tracer)
+
+      query = """
+      query{
+        human(id: "foo"){
+          name
+          id,
+          pets{
+            name
+          }
+        }
+      }
+      """
+
+      conn = put_req_header(conn, "authorization", "auth0|test_user_id")
+      conn = post(conn, "/graphql", %{"query" => query})
+
+      assert json_response(conn, 200) == %{
+               "data" => %{
+                 "human" => %{
+                   "id" => "foo",
+                   "name" => "Stephen",
+                   "pets" => [%{"name" => "Pinky"}, %{"name" => "Brain"}]
+                 }
+               }
+             }
+
+      assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
+      {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+
+      assert {"auth0_user_id", "auth0|test_user_id"} in attributes
+      :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
+    end
+
+    test "when current_user is malformed, does not explode", %{conn: conn} do
+      MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_tracer)
+
+      query = """
+      query{
+        human(id: "foo"){
+          name
+          id,
+          pets{
+            name
+          }
+        }
+      }
+      """
+
+      conn = put_req_header(conn, "authorization", "auth0|malformed")
+      conn = post(conn, "/graphql", %{"query" => query})
+
+      assert json_response(conn, 200) == %{
+               "data" => %{
+                 "human" => %{
+                   "id" => "foo",
+                   "name" => "Stephen",
+                   "pets" => [%{"name" => "Pinky"}, %{"name" => "Brain"}]
+                 }
+               }
+             }
+
+      assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
+      {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+
+      assert {"auth0_user_id", nil} in attributes
+      :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
+    end
+  end
+
   test "sends error data to pid", %{conn: conn} do
     MvOpentelemetry.Absinthe.register_tracer(name: :test_absinthe_error_tracer)
 
