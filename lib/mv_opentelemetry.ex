@@ -80,8 +80,6 @@ defmodule MvOpentelemetry do
     - `span_prefix` OPTIONAL telemetry prefix to listen to. Defaults to [:phoenix, :endpoint]
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
       from this group, for example [{"service.component", "ecto"}]. Defaults to []
-    - `query_params_whitelist` OPTIONAL list of query param names you want to allow to log in your
-      traces, i.e ["user_id", "product_id"]. Defaults to logging all.
 
   ## Broadway
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces

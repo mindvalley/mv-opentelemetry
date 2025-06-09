@@ -29,13 +29,11 @@ defmodule MvOpentelemetry.Plug do
   defp handle_opts(opts) do
     span_prefix = opts[:span_prefix] || [:phoenix, :endpoint]
     tracer_id = :mv_opentelemetry
-    query_params_whitelist = opts[:query_params_whitelist]
     default_attributes = opts[:default_attributes] || []
 
     [
       span_prefix: span_prefix,
       tracer_id: tracer_id,
-      query_params_whitelist: query_params_whitelist,
       default_attributes: default_attributes
     ]
   end
@@ -82,19 +80,14 @@ defmodule MvOpentelemetry.Plug do
       {"net.host.port", conn.port},
       {"net.peer.ip", to_string(:inet_parse.ntoa(peer_ip))},
       {"net.peer.port", peer_data.port},
+      {"http.query", conn.query_string},
       {Trace.net_transport(), "IP.TCP"}
     ]
-
-    query_attributes =
-      conn.query_params
-      |> filter_list(opts[:query_params_whitelist])
-      |> Enum.map(&prefix_key_with(&1, "http.query_params"))
 
     path_attributes = Enum.map(conn.path_params, &prefix_key_with(&1, "http.path_params"))
 
     attributes =
-      attributes ++
-        force_trace_attrs ++ query_attributes ++ path_attributes ++ opts[:default_attributes]
+      attributes ++ force_trace_attrs ++ path_attributes ++ opts[:default_attributes]
 
     event_name = "HTTP #{conn.method}"
 
@@ -127,12 +120,6 @@ defmodule MvOpentelemetry.Plug do
   defp prefix_key_with({key, value}, prefix) when is_binary(key) do
     complete_key = prefix <> "." <> key
     {complete_key, value}
-  end
-
-  defp filter_list(params, nil), do: params
-
-  defp filter_list(params, whitelist) do
-    Enum.filter(params, fn {k, _v} -> Enum.member?(whitelist, k) end)
   end
 
   defp client_ip(conn) do
