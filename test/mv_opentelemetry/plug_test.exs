@@ -38,6 +38,29 @@ defmodule MvOpentelemetry.PlugTest do
     assert :"client.address" in keys
   end
 
+  test "handles query params" do
+    url = Routes.page_url(MvOpentelemetryHarnessWeb.Endpoint, :index, %{query: "Params"})
+
+    {:ok, %{headers: headers}} =
+      Finch.build(:get, url, [{"user-agent", "Plug Test"}, {"referer", "http://localhost"}])
+      |> Finch.request(__MODULE__)
+
+    request_id = :proplists.get_value("x-request-id", headers)
+
+    assert_receive {:span, span(name: "GET /") = span_record}
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+    keys = Enum.map(attributes, fn {k, _v} -> k end)
+
+    assert {:"http.response.status_code", 200} in attributes
+    assert {:"http.request.method", :GET} in attributes
+    assert {:"url.path", "/"} in attributes
+    assert {:"url.query", "query=Params"} in attributes
+    assert {:"user_agent.original", "Plug Test"} in attributes
+    assert {:"http.request.header.referer", ["http://localhost"]} in attributes
+    assert {:"http.response.header.x-request-id", [request_id]} in attributes
+    assert :"client.address" in keys
+  end
+
   test "handles 404" do
     url = "http://localhost:4002/404"
 
