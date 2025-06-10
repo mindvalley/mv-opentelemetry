@@ -33,6 +33,7 @@ defmodule MvOpentelemetry do
   @type traced_apps ::
           :absinthe
           | :broadway
+          | :cowboy
           | :dataloader
           | :ecto
           | :finch
