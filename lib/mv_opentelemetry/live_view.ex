@@ -180,7 +180,7 @@ defmodule MvOpentelemetry.LiveView do
     :ok
   end
 
-  defp filter_list(params, nil), do: params
+  defp filter_list(_params, nil), do: []
 
   defp filter_list(params, whitelist) do
     Enum.filter(params, fn {k, _v} -> Enum.member?(whitelist, k) end)
