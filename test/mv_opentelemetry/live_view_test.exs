@@ -2,6 +2,22 @@ defmodule MvOpentelemetry.LiveViewTest do
   use MvOpentelemetry.OpenTelemetryCase
   import Phoenix.LiveViewTest
 
+  test "does not set query params if none given", %{conn: conn} do
+    MvOpentelemetry.LiveView.register_tracer(name: :test_live_view_tracer)
+
+    assert {:ok, _view, html} = live(conn, "/live?live_id=11")
+    assert html =~ "LiveLive"
+
+    assert_receive {:span, span(name: "live_view.disconnected.mount") = span_record}
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+
+    assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
+    assert {"live_view.connected", false} in attributes
+    refute {"live_view.params.live_id", "11"} in attributes
+
+    :ok = :telemetry.detach({:test_live_view_tracer, MvOpentelemetry.LiveView})
+  end
+
   test "sends OpenTelemetry events to pid()", %{conn: conn} do
     MvOpentelemetry.LiveView.register_tracer(
       name: :test_live_view_tracer,
@@ -16,14 +32,12 @@ defmodule MvOpentelemetry.LiveViewTest do
 
     assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     assert {"potatoeh", "potatoe"} in attributes
-    assert {"live_view.params.live_id", "11"} in attributes
     assert {"live_view.connected", false} in attributes
 
     assert_receive {:span, span(name: "live_view.disconnected.handle_params") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
-    assert {"live_view.params.live_id", "11"} in attributes
     assert {"potatoeh", "potatoe"} in attributes
     assert {"live_view.connected", false} in attributes
 
@@ -32,14 +46,12 @@ defmodule MvOpentelemetry.LiveViewTest do
 
     assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     assert {"potatoeh", "potatoe"} in attributes
-    assert {"live_view.params.live_id", "11"} in attributes
     assert {"live_view.connected", true} in attributes
 
     assert_receive {:span, span(name: "live_view.connected.handle_params") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
-    assert {"live_view.params.live_id", "11"} in attributes
     assert {"potatoeh", "potatoe"} in attributes
     assert {"live_view.connected", true} in attributes
 

@@ -64,7 +64,7 @@ defmodule MvOpentelemetry do
     - `default_attributes` OPTIONAL property list of attributes you want to attach to all traces
       from this group, for example [{"service.component", "my_app"}]. Defaults to []
     - `query_params_whitelist` OPTIONAL list of query param names you want to allow to log in your
-      traces, i.e ["user_id", "product_id"]. Defaults to logging all.
+      traces, i.e ["user_id", "product_id"]. Defaults to logging none at all.
 
   ## Absinthe
     - `prefix` OPTIONAL telemetry prefix that will be emited in events, defaults to "graphql"
