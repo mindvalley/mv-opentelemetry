@@ -6,6 +6,7 @@ config :mv_opentelemetry_harness,
 # Configures the endpoint
 config :mv_opentelemetry_harness, MvOpentelemetryHarnessWeb.Endpoint,
   url: [host: "localhost"],
+  adapter: Phoenix.Endpoint.Cowboy2Adapter,
   secret_key_base: "yu69b2fyPQLDba6EWwyNe2xAXAkcAQT68owg8KhGL/Hfosl3QuYOffSE+eFvqeuX",
   live_view: [signing_salt: "FqZ8F1CaCmC4SQIB"],
   render_errors: [
