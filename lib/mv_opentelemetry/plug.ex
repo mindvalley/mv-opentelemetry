@@ -42,9 +42,12 @@ defmodule MvOpentelemetry.Plug do
       :cowboy ->
         OpentelemetryProcessPropagator.fetch_parent_ctx()
         |> OpenTelemetry.Ctx.attach()
-    end
 
-    :ok
+        :ok
+
+      :bandit ->
+        :ok
+    end
   end
 
   @spec handle_router_dispatch(
@@ -59,6 +62,11 @@ defmodule MvOpentelemetry.Plug do
       :cowboy ->
         OpentelemetryProcessPropagator.fetch_parent_ctx()
         |> OpenTelemetry.Ctx.attach()
+
+        :ok
+
+      :bandit ->
+        :ok
     end
 
     attributes = %{

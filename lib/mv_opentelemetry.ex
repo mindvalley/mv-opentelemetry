@@ -32,6 +32,7 @@ defmodule MvOpentelemetry do
   """
   @type traced_apps ::
           :absinthe
+          | :bandit
           | :broadway
           | :cowboy
           | :dataloader
@@ -84,6 +85,13 @@ defmodule MvOpentelemetry do
   - request_headers: ["referer"]
   - response_headers: ["x-request-id"]
 
+  ## Bandit
+  This is a shallow wrapper for opentelemetry_bandit. It accepts the same options as
+  OpentelemetryBandit.setup/1 with the following extra defaults:
+  - public_endpoint: false
+  - request_headers: ["referer"]
+  - response_headers: ["x-request-id"]
+
   ## Plug
   NB! Requires cowboy tracer being set up! Then accepts the following options:
 
@@ -110,8 +118,9 @@ defmodule MvOpentelemetry do
 
   @spec register_tracer(traced_apps(), Access.t()) :: :ok
   def register_tracer(:absinthe, opts), do: __MODULE__.Absinthe.register_tracer(opts)
-  def register_tracer(:cowboy, opts), do: __MODULE__.Cowboy.register_tracer(opts)
+  def register_tracer(:bandit, opts), do: __MODULE__.Bandit.register_tracer(opts)
   def register_tracer(:broadway, opts), do: __MODULE__.Broadway.Messages.register_tracer(opts)
+  def register_tracer(:cowboy, opts), do: __MODULE__.Cowboy.register_tracer(opts)
   def register_tracer(:dataloader, opts), do: __MODULE__.Dataloader.register_tracer(opts)
   def register_tracer(:ecto, opts), do: __MODULE__.Ecto.register_tracer(opts)
   def register_tracer(:finch, opts), do: __MODULE__.Finch.register_tracer(opts)
@@ -120,5 +129,5 @@ defmodule MvOpentelemetry do
   def register_tracer(:plug, opts), do: __MODULE__.Plug.register_tracer(opts)
   def register_tracer(:tesla, opts), do: __MODULE__.Tesla.register_tracer(opts)
 
-  def version, do: "3.0.0"
+  def version, do: "3.3.0"
 end

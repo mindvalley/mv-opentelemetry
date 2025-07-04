@@ -4,7 +4,7 @@ defmodule MvOpentelemetry.MixProject do
   def project do
     [
       app: :mv_opentelemetry,
-      version: "3.0.0",
+      version: "3.3.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -50,6 +50,7 @@ defmodule MvOpentelemetry.MixProject do
       {:opentelemetry_process_propagator, "~> 0.1"},
       {:opentelemetry_semantic_conventions, "~> 1.0"},
       {:opentelemetry_cowboy, "~> 1.0"},
+      {:opentelemetry_bandit, "~> 0.2"},
 
       # Test and development harness
       {:opentelemetry, "~> 1.0", only: [:dev, :test]},
