@@ -120,6 +120,7 @@ defmodule MvOpentelemetry.PlugTest do
     assert {:"user_agent.original", "Plug Test"} in attributes
     assert {:"http.request.header.referer", ["http://localhost"]} in attributes
     assert {:"http.response.header.x-request-id", [request_id]} in attributes
+    refute :force_sample in keys
     assert :"client.address" in keys
   end
 
@@ -133,6 +134,27 @@ defmodule MvOpentelemetry.PlugTest do
     assert_receive {:span, span(name: "GET /") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
+    assert {:"phoenix.action", :index} in attributes
+    assert {:"phoenix.plug", MvOpentelemetryHarnessWeb.PageController} in attributes
+  end
+
+  test "adds force sampling" do
+    url = Routes.page_url(MvOpentelemetryHarnessWeb.Endpoint, :index)
+
+    headers = [
+      {"user-agent", "Plug Test"},
+      {"referer", "http://localhost"},
+      {"x-force-sample", "true"}
+    ]
+
+    {:ok, _any} =
+      Finch.build(:get, url, headers)
+      |> Finch.request(__MODULE__)
+
+    assert_receive {:span, span(name: "GET /") = span_record}
+    {:attributes, _, _, _, attributes} = span(span_record, :attributes)
+
+    assert {:force_sample, true} in attributes
     assert {:"phoenix.action", :index} in attributes
     assert {:"phoenix.plug", MvOpentelemetryHarnessWeb.PageController} in attributes
   end
