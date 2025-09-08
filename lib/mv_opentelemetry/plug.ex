@@ -69,12 +69,13 @@ defmodule MvOpentelemetry.Plug do
         :ok
     end
 
-    attributes = %{
-      :"phoenix.plug" => meta.plug,
-      :"phoenix.action" => meta.plug_opts,
-      SemConv.HTTPAttributes.http_route() => meta.route
-    }
-    |> maybe_put_force_trace(meta)
+    attributes =
+      %{
+        :"phoenix.plug" => meta.plug,
+        :"phoenix.action" => meta.plug_opts,
+        SemConv.HTTPAttributes.http_route() => meta.route
+      }
+      |> maybe_put_force_trace(meta)
 
     Tracer.update_name("#{meta.conn.method} #{meta.route}")
     Tracer.set_attributes(attributes)
