@@ -69,15 +69,24 @@ defmodule MvOpentelemetry.Plug do
         :ok
     end
 
-    attributes = %{
-      :"phoenix.plug" => meta.plug,
-      :"phoenix.action" => meta.plug_opts,
-      SemConv.HTTPAttributes.http_route() => meta.route
-    }
+    attributes =
+      %{
+        :"phoenix.plug" => meta.plug,
+        :"phoenix.action" => meta.plug_opts,
+        SemConv.HTTPAttributes.http_route() => meta.route
+      }
+      |> maybe_put_force_trace(meta)
 
     Tracer.update_name("#{meta.conn.method} #{meta.route}")
     Tracer.set_attributes(attributes)
 
     :ok
+  end
+
+  defp maybe_put_force_trace(attributes, meta) do
+    case :proplists.get_value("x-force-sample", meta.conn.req_headers) do
+      "true" -> Map.put(attributes, :force_sample, true)
+      _ -> attributes
+    end
   end
 end
