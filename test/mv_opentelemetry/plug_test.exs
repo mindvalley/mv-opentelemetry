@@ -154,7 +154,7 @@ defmodule MvOpentelemetry.PlugTest do
     assert_receive {:span, span(name: "GET /") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {:force_sample, true} in attributes
+    assert {:"app.force_sample", true} in attributes
     assert {:"phoenix.action", :index} in attributes
     assert {:"phoenix.plug", MvOpentelemetryHarnessWeb.PageController} in attributes
   end

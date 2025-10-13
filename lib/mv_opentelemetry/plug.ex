@@ -85,7 +85,7 @@ defmodule MvOpentelemetry.Plug do
 
   defp maybe_put_force_trace(attributes, meta) do
     case :proplists.get_value("x-force-sample", meta.conn.req_headers) do
-      "true" -> Map.put(attributes, :force_sample, true)
+      "true" -> Map.put(attributes, :"app.force_sample", true)
       _ -> attributes
     end
   end
