@@ -41,11 +41,11 @@ jobs:
       - name: Run Sobelow
         continue-on-error: true
         run: |
-          mkdir -p reports
-          sobelow --exit --format sarif --output reports/results.sarif
+          sobelow --exit --format sarif > results.sarif
 
       - name: Upload report
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: reports/results.sarif
+          sarif_file: results.sarif
+          category: security
