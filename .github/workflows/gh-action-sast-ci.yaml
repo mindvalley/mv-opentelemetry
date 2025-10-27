@@ -1,6 +1,10 @@
 name: Static Application Security Testing
 
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   schedule:
     - cron: "0 0 * * 1"
   workflow_dispatch:
@@ -9,19 +13,39 @@ permissions:
   contents: read
 
 jobs:
-  run_sobelow_scan:
+  security-scan:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
       actions: read
-    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-      - id: run-action
-        uses: sobelow/action@v1
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.14"
+          otp-version: "26"
+
+      - name: Install dependencies
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
+
+      - name: Install Sobelow
+        run: mix escript.install hex sobelow --force
+
+      - name: Run Sobelow
+        continue-on-error: true
+        run: |
+          mkdir -p reports
+          sobelow --exit --format sarif --output reports/results.sarif
 
       - name: Upload report
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: results.sarif
+          sarif_file: reports/results.sarif
