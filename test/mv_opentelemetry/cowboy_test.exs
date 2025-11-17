@@ -22,7 +22,7 @@ defmodule MvOpentelemetry.CowboyTest do
     assert {:"http.response.status_code", 200} in attributes
     assert {:"http.request.method", :GET} in attributes
     assert {:"url.path", "/"} in attributes
-    assert {:"user_agent.original", "mint/1.6.2"} in attributes
+    assert {:"user_agent.original", "mint/1.7.1"} in attributes
     assert {:"network.protocol.version", :"1.1"} in attributes
     assert {:"http.response.header.x-request-id", [request_id]} in attributes
     assert :"client.address" in keys
@@ -54,7 +54,7 @@ defmodule MvOpentelemetry.CowboyTest do
     assert {:"http.response.status_code", 404} in attributes
     assert {:"http.request.method", :GET} in attributes
     assert {:"url.path", path} in attributes
-    assert {:"user_agent.original", "mint/1.6.2"} in attributes
+    assert {:"user_agent.original", "mint/1.7.1"} in attributes
     assert {:"network.protocol.version", :"1.1"} in attributes
     assert {:"http.response.header.x-request-id", [request_id]} in attributes
     assert :"client.address" in keys
