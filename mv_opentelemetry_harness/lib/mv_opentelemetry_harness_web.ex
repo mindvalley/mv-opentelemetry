@@ -19,7 +19,7 @@ defmodule MvOpentelemetryHarnessWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: MvOpentelemetryHarnessWeb
+      use Phoenix.Controller, formats: [html: "View", json: "View"]
 
       import Plug.Conn
       alias MvOpentelemetryHarnessWeb.Router.Helpers, as: Routes
