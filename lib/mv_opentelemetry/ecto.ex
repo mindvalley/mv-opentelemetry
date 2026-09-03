@@ -57,12 +57,12 @@ defmodule MvOpentelemetry.Ecto do
       end
 
     base_attributes = [
-      {"db.type", db_type},
-      {"db.statement", query},
-      {"db.source", source},
-      {"db.instance", repo_config[:database]},
-      {"db.url", url},
-      {"db.total_time_microseconds", convert_time(total_time)}
+      {:"db.type", db_type},
+      {:"db.statement", query},
+      {:"db.source", source},
+      {:"db.instance", repo_config[:database]},
+      {:"db.url", url},
+      {:"db.total_time_microseconds", convert_time(total_time)}
     ]
 
     default_attributes = config[:default_attributes]
@@ -97,7 +97,7 @@ defmodule MvOpentelemetry.Ecto do
     case meta[:stacktrace] do
       stacktrace when is_list(stacktrace) ->
         [
-          {"ecto.stacktrace", inspect(stacktrace)}
+          {:"ecto.stacktrace", inspect(stacktrace)}
         ]
 
       _ ->

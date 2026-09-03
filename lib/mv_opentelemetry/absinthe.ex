@@ -69,8 +69,8 @@ defmodule MvOpentelemetry.Absinthe do
     resolution = meta.resolution
 
     attributes = [
-      {"graphql.field.name", resolution.definition.name},
-      {"graphql.field.schema", resolution.schema}
+      {:"graphql.field.name", resolution.definition.name},
+      {:"graphql.field.schema", resolution.schema}
     ]
 
     attributes = attributes ++ opts[:default_attributes]
@@ -87,12 +87,12 @@ defmodule MvOpentelemetry.Absinthe do
 
     attributes =
       [
-        {"graphql.operation.input", meta.blueprint.input}
+        {:"graphql.operation.input", meta.blueprint.input}
       ] ++ opts[:default_attributes]
 
     attributes =
       if opts[:trace_variables] do
-        attributes ++ [{"graphql.operation.variables", Jason.encode!(variables)}]
+        attributes ++ [{:"graphql.operation.variables", Jason.encode!(variables)}]
       else
         attributes
       end
@@ -107,7 +107,7 @@ defmodule MvOpentelemetry.Absinthe do
     resolution = meta.resolution
     ctx = OpentelemetryTelemetry.set_current_telemetry_span(opts[:tracer_id], meta)
 
-    attributes = [{"graphql.field.state", resolution.state}]
+    attributes = [{:"graphql.field.state", resolution.state}]
 
     Span.set_attributes(ctx, attributes)
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
@@ -132,9 +132,9 @@ defmodule MvOpentelemetry.Absinthe do
       end
 
     attributes = [
-      {"graphql.operation.schema", meta.blueprint.schema},
-      {"graphql.operation.complexity", complexity},
-      {"auth0_user_id", current_user_uid}
+      {:"graphql.operation.schema", meta.blueprint.schema},
+      {:"graphql.operation.complexity", complexity},
+      {:auth0_user_id, current_user_uid}
     ]
 
     Span.set_attributes(ctx, attributes)

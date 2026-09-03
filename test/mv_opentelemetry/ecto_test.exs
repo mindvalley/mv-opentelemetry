@@ -16,14 +16,14 @@ defmodule MvOpentelemetry.EctoTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
-    assert {"db.type", :sql} in attributes
+    assert {:"db.type", :sql} in attributes
     assert {"service.component", "test.harness"} in attributes
-    assert {"db.source", nil} in attributes
+    assert {:"db.source", nil} in attributes
 
-    assert "db.statement" in keys
-    assert "db.instance" in keys
-    assert "db.url" in keys
-    assert "db.total_time_microseconds" in keys
+    assert :"db.statement" in keys
+    assert :"db.instance" in keys
+    assert :"db.url" in keys
+    assert :"db.total_time_microseconds" in keys
 
     :ok =
       :telemetry.detach({[:mv_opentelemetry_harness, :repo], MvOpentelemetry.Ecto, :handle_event})
@@ -42,13 +42,13 @@ defmodule MvOpentelemetry.EctoTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
-    assert {"db.source", "pages"} in attributes
-    assert {"db.type", :sql} in attributes
+    assert {:"db.source", "pages"} in attributes
+    assert {:"db.type", :sql} in attributes
     assert {"service.component", "test.harness"} in attributes
-    assert "db.statement" in keys
-    assert "db.instance" in keys
-    assert "db.url" in keys
-    assert "db.total_time_microseconds" in keys
+    assert :"db.statement" in keys
+    assert :"db.instance" in keys
+    assert :"db.url" in keys
+    assert :"db.total_time_microseconds" in keys
 
     :ok =
       :telemetry.detach({[:mv_opentelemetry_harness, :repo], MvOpentelemetry.Ecto, :handle_event})
@@ -70,7 +70,7 @@ defmodule MvOpentelemetry.EctoTest do
       Page.all() |> Repo.all()
       assert_receive {:span, span(name: "mv_opentelemetry_harness.repo.pages") = span_record}
       assert {:attributes, _, _, _, attributes} = span(span_record, :attributes)
-      assert %{"ecto.stacktrace" => stacktrace} = attributes
+      assert %{:"ecto.stacktrace" => stacktrace} = attributes
       assert is_binary(stacktrace)
     end)
 

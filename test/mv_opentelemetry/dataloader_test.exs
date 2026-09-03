@@ -38,10 +38,10 @@ defmodule MvOpentelemetry.DataloaderTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
     expected_attributes = %{
-      "dataloader.source.batch.cardinality" => :one,
-      "dataloader.source.batch.column" => :id,
-      "dataloader.source.batch.queryable" => MvOpentelemetryHarness.Page,
-      "dataloader.source.batch.type" => "queryable",
+      :"dataloader.source.batch.cardinality" => :one,
+      :"dataloader.source.batch.column" => :id,
+      :"dataloader.source.batch.queryable" => MvOpentelemetryHarness.Page,
+      :"dataloader.source.batch.type" => "queryable",
       "service.component" => "test.harness"
     }
 

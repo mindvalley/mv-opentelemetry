@@ -40,18 +40,18 @@ defmodule MvOpentelemetry.Dataloader do
       case batch do
         {{:queryable, _pid, queryable, cardinality, col, _}, _} ->
           [
-            {"dataloader.source.batch.type", "queryable"},
-            {"dataloader.source.batch.queryable", queryable},
-            {"dataloader.source.batch.cardinality", cardinality},
-            {"dataloader.source.batch.column", col}
+            {:"dataloader.source.batch.type", "queryable"},
+            {:"dataloader.source.batch.queryable", queryable},
+            {:"dataloader.source.batch.cardinality", cardinality},
+            {:"dataloader.source.batch.column", col}
           ]
 
         {{:assoc, schema, _pid, assoc_field, queryable, _}, _} ->
           [
-            {"dataloader.source.batch.type", "assoc"},
-            {"dataloader.source.batch.schema", schema},
-            {"dataloader.source.batch.assoc_field", assoc_field},
-            {"dataloader.source.batch.queryable", queryable}
+            {:"dataloader.source.batch.type", "assoc"},
+            {:"dataloader.source.batch.schema", schema},
+            {:"dataloader.source.batch.assoc_field", assoc_field},
+            {:"dataloader.source.batch.queryable", queryable}
           ]
 
         _ ->

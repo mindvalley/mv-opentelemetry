@@ -22,11 +22,11 @@ defmodule MvOpentelemetry.Broadway.MessagesTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
-    assert "broadway.index" in keys
-    assert "broadway.messages_count" in keys
-    assert "broadway.processor_key" in keys
-    assert "broadway.stage" in keys
-    assert "broadway.topology_name" in keys
+    assert :"broadway.index" in keys
+    assert :"broadway.messages_count" in keys
+    assert :"broadway.processor_key" in keys
+    assert :"broadway.stage" in keys
+    assert :"broadway.topology_name" in keys
     assert "service.component" in keys
   end
 end

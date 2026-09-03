@@ -14,11 +14,11 @@ defmodule MvOpentelemetry.Broadway.Messages do
   @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
   def handle_event([:broadway, :processor, :start], _measurements, meta, opts) do
     attributes = [
-      {"broadway.topology_name", meta.topology_name |> inspect()},
-      {"broadway.stage", :processor},
-      {"broadway.index", meta.index},
-      {"broadway.processor_key", meta.processor_key},
-      {"broadway.messages_count", length(meta.messages)}
+      {:"broadway.topology_name", meta.topology_name |> inspect()},
+      {:"broadway.stage", :processor},
+      {:"broadway.index", meta.index},
+      {:"broadway.processor_key", meta.processor_key},
+      {:"broadway.messages_count", length(meta.messages)}
     ]
 
     event_name = "broadway.processor.start"
