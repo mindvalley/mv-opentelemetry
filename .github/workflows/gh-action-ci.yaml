@@ -29,7 +29,7 @@ jobs:
       # and running the workflow steps.
       matrix:
         otp: ["27.2", "28.3"]
-        elixir: ["1.18", "1.19"]
+        elixir: ["1.18", "1.19", "1.20"]
     services:
       db:
         env:
@@ -65,7 +65,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          mix do deps.get, compile
+          mix do deps.get + compile
 
       - name: Run pre-checks
         run: |
