@@ -36,21 +36,21 @@ defmodule MvOpentelemetry.AbsintheTest do
 
     assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
-    assert {"graphql.operation.variables", Jason.encode!(variables)} in attributes
+    assert {:"graphql.operation.variables", Jason.encode!(variables)} in attributes
 
     assert_receive {:span, span(name: "graphql.resolve.field.human") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"graphql.field.name", "human"} in attributes
+    assert {:"graphql.field.name", "human"} in attributes
     assert {"service.component", "test.harness"} in attributes
-    assert {"graphql.field.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
+    assert {:"graphql.field.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
     assert_receive {:span, span(name: "graphql.resolve.field.pets") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"graphql.field.name", "pets"} in attributes
+    assert {:"graphql.field.name", "pets"} in attributes
     assert {"service.component", "test.harness"} in attributes
-    assert {"graphql.field.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
+    assert {:"graphql.field.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
     :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
   end
@@ -85,10 +85,10 @@ defmodule MvOpentelemetry.AbsintheTest do
     assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"graphql.operation.input", query} in attributes
-    assert {"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
-    assert {"graphql.operation.complexity", 5} in attributes
-    assert {"graphql.operation.variables", "{}"} in attributes
+    assert {:"graphql.operation.input", query} in attributes
+    assert {:"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
+    assert {:"graphql.operation.complexity", 5} in attributes
+    assert {:"graphql.operation.variables", "{}"} in attributes
 
     :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
   end
@@ -125,7 +125,7 @@ defmodule MvOpentelemetry.AbsintheTest do
       assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
       {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-      assert {"auth0_user_id", "auth0|test_user_id"} in attributes
+      assert {:auth0_user_id, "auth0|test_user_id"} in attributes
       :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
     end
 
@@ -160,7 +160,7 @@ defmodule MvOpentelemetry.AbsintheTest do
       assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
       {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-      assert {"auth0_user_id", "auth0|test_user_id"} in attributes
+      assert {:auth0_user_id, "auth0|test_user_id"} in attributes
       :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
     end
 
@@ -195,7 +195,7 @@ defmodule MvOpentelemetry.AbsintheTest do
       assert_receive {:span, span(name: "graphql.execute.operation") = span_record}
       {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-      assert {"auth0_user_id", nil} in attributes
+      assert {:auth0_user_id, nil} in attributes
       :ok = :telemetry.detach({:test_absinthe_tracer, MvOpentelemetry.Absinthe})
     end
   end
@@ -231,10 +231,10 @@ defmodule MvOpentelemetry.AbsintheTest do
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
     keys = Enum.map(attributes, fn {k, _v} -> k end)
 
-    assert {"graphql.operation.input", query} in attributes
-    refute "graphql.operation.variables" in keys
-    assert {"graphql.operation.complexity", nil} in attributes
-    assert {"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
+    assert {:"graphql.operation.input", query} in attributes
+    refute :"graphql.operation.variables" in keys
+    assert {:"graphql.operation.complexity", nil} in attributes
+    assert {:"graphql.operation.schema", MvOpentelemetryHarnessWeb.Schema} in attributes
 
     :ok = :telemetry.detach({:test_absinthe_error_tracer, MvOpentelemetry.Absinthe})
   end

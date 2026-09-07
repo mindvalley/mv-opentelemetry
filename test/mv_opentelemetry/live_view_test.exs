@@ -11,8 +11,8 @@ defmodule MvOpentelemetry.LiveViewTest do
     assert_receive {:span, span(name: "live_view.disconnected.mount") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
-    assert {"live_view.connected", false} in attributes
+    assert {:"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
+    assert {:"live_view.connected", false} in attributes
     refute {"live_view.params.live_id", "11"} in attributes
 
     :ok = :telemetry.detach({:test_live_view_tracer, MvOpentelemetry.LiveView})
@@ -30,30 +30,30 @@ defmodule MvOpentelemetry.LiveViewTest do
     assert_receive {:span, span(name: "live_view.disconnected.mount") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
+    assert {:"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     assert {"potatoeh", "potatoe"} in attributes
-    assert {"live_view.connected", false} in attributes
+    assert {:"live_view.connected", false} in attributes
 
     assert_receive {:span, span(name: "live_view.disconnected.handle_params") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
+    assert {:"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     assert {"potatoeh", "potatoe"} in attributes
-    assert {"live_view.connected", false} in attributes
+    assert {:"live_view.connected", false} in attributes
 
     assert_receive {:span, span(name: "live_view.connected.mount") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
+    assert {:"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     assert {"potatoeh", "potatoe"} in attributes
-    assert {"live_view.connected", true} in attributes
+    assert {:"live_view.connected", true} in attributes
 
     assert_receive {:span, span(name: "live_view.connected.handle_params") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
+    assert {:"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     assert {"potatoeh", "potatoe"} in attributes
-    assert {"live_view.connected", true} in attributes
+    assert {:"live_view.connected", true} in attributes
 
     :ok = :telemetry.detach({:test_live_view_tracer, MvOpentelemetry.LiveView})
   end
@@ -70,14 +70,14 @@ defmodule MvOpentelemetry.LiveViewTest do
     assert_receive {:span, span(name: "live_view.disconnected.mount") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
+    assert {:"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     refute {"live_view.params.live_id", "11"} in attributes
     assert {"live_view.params.user_id", "12"} in attributes
 
     assert_receive {:span, span(name: "live_view.disconnected.handle_params") = span_record}
     {:attributes, _, _, _, attributes} = span(span_record, :attributes)
 
-    assert {"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
+    assert {:"live_view.view", MvOpentelemetryHarnessWeb.LiveLive} in attributes
     refute {"live_view.params.live_id", "11"} in attributes
     assert {"live_view.params.user_id", "12"} in attributes
 

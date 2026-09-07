@@ -3,7 +3,7 @@ defmodule MvOpentelemetry.Plug do
 
   alias OpenTelemetry.SemConv
 
-  require OpenTelemetry.Tracer, as: Tracer
+  alias OpenTelemetry.Tracer, as: Tracer
 
   @spec register_tracer(opts :: Access.t()) :: :ok
   def register_tracer(opts) do

@@ -34,9 +34,9 @@ defmodule MvOpentelemetry.LiveView do
   @spec handle_event([atom()], map(), map(), Access.t()) :: :ok
   def handle_event([:phoenix, :live_view, :mount, :start] = event, _measurements, meta, opts) do
     attributes = [
-      {"live_view.view", meta.socket.view},
-      {"live_view.connected", connected?(meta.socket)},
-      {"live_view.socket.id", meta.socket.id}
+      {:"live_view.view", meta.socket.view},
+      {:"live_view.connected", connected?(meta.socket)},
+      {:"live_view.socket.id", meta.socket.id}
     ]
 
     params_attributes =
@@ -62,10 +62,10 @@ defmodule MvOpentelemetry.LiveView do
         opts
       ) do
     attributes = [
-      {"live_view.view", meta.socket.view},
-      {"live_view.uri", meta[:uri]},
-      {"live_view.connected", connected?(meta.socket)},
-      {"live_view.socket.id", meta.socket.id}
+      {:"live_view.view", meta.socket.view},
+      {:"live_view.uri", meta[:uri]},
+      {:"live_view.connected", connected?(meta.socket)},
+      {:"live_view.socket.id", meta.socket.id}
     ]
 
     params_attributes =
@@ -91,11 +91,11 @@ defmodule MvOpentelemetry.LiveView do
         opts
       ) do
     attributes = [
-      {"live_view.view", meta.socket.view},
-      {"live_view.uri", meta[:uri]},
-      {"live_view.event", meta.event},
-      {"live_view.connected", connected?(meta.socket)},
-      {"live_view.socket.id", meta.socket.id}
+      {:"live_view.view", meta.socket.view},
+      {:"live_view.uri", meta[:uri]},
+      {:"live_view.event", meta.event},
+      {:"live_view.connected", connected?(meta.socket)},
+      {:"live_view.socket.id", meta.socket.id}
     ]
 
     name = get_name(event, opts, meta.socket)
@@ -121,13 +121,13 @@ defmodule MvOpentelemetry.LiveView do
         opts
       ) do
     attributes = [
-      {"live_component.view", meta.socket.view},
-      {"live_component.event", meta.event},
-      {"live_component.component", meta.component},
-      {"live_component.host_uri", meta.socket.host_uri},
-      {"live_component.uri", meta[:uri]},
-      {"live_view.connected", connected?(meta.socket)},
-      {"live_view.socket.id", meta.socket.id}
+      {:"live_component.view", meta.socket.view},
+      {:"live_component.event", meta.event},
+      {:"live_component.component", meta.component},
+      {:"live_component.host_uri", meta.socket.host_uri},
+      {:"live_component.uri", meta[:uri]},
+      {:"live_view.connected", connected?(meta.socket)},
+      {:"live_view.socket.id", meta.socket.id}
     ]
 
     name = get_name(event, opts, meta.socket)
@@ -145,11 +145,11 @@ defmodule MvOpentelemetry.LiveView do
     Span.set_status(ctx, OpenTelemetry.status(:error, ""))
 
     attributes = [
-      {"live_view.kind", meta.kind},
-      {"live_view.reason", meta.reason},
-      {"error", true},
-      {"live_view.connected", connected?(meta.socket)},
-      {"live_view.socket.id", meta.socket.id}
+      {:"live_view.kind", meta.kind},
+      {:"live_view.reason", meta.reason},
+      {:error, true},
+      {:"live_view.connected", connected?(meta.socket)},
+      {:"live_view.socket.id", meta.socket.id}
     ]
 
     Span.set_attributes(ctx, attributes)
@@ -162,11 +162,11 @@ defmodule MvOpentelemetry.LiveView do
     Span.set_status(ctx, OpenTelemetry.status(:error, ""))
 
     attributes = [
-      {"live_component.kind", meta.kind},
-      {"live_component.reason", meta.reason},
-      {"error", true},
-      {"live_view.connected", connected?(meta.socket)},
-      {"live_view.socket.id", meta.socket.id}
+      {:"live_component.kind", meta.kind},
+      {:"live_component.reason", meta.reason},
+      {:error, true},
+      {:"live_view.connected", connected?(meta.socket)},
+      {:"live_view.socket.id", meta.socket.id}
     ]
 
     Span.set_attributes(ctx, attributes)
