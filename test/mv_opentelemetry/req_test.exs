@@ -28,6 +28,7 @@ defmodule MvOpentelemetry.ReqTest do
     assert :client == span(span_record, :kind)
 
     assert {:"http.response.status_code", 200} in attributes
+    assert {:"http.response.header.content-length", ["0"]} in attributes
     assert {:"server.address", "localhost"} in attributes
     assert {:"http.request.method", "GET"} in attributes
     assert {:"url.path", "/"} in attributes
