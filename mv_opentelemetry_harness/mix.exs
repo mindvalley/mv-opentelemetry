@@ -59,7 +59,7 @@ defmodule MvOpentelemetryHarness.MixProject do
 
       # HTTP clients
       {:finch, "~> 0.14"},
-      {:tesla, "~> 1.4"},
+      {:tesla, "~> 1.21"},
       {:req, "~> 0.5"}
     ]
   end
