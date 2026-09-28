@@ -129,5 +129,5 @@ defmodule MvOpentelemetry do
   def register_tracer(:plug, opts), do: __MODULE__.Plug.register_tracer(opts)
   def register_tracer(:tesla, opts), do: __MODULE__.Tesla.register_tracer(opts)
 
-  def version, do: "3.3.0"
+  def version, do: "3.6.0"
 end
