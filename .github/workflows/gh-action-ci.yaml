@@ -129,15 +129,22 @@ jobs:
           base_version="$(git show "$merge_base:mix.exs" | read_version)"
           head_version="$(read_version < mix.exs)"
 
+          if [ -z "$head_version" ]; then
+            echo "::error file=mix.exs::Could not read the project version out of mix.exs."
+            exit 1
+          fi
+
+          version_line="$(grep -m1 -n '^ *version: "' mix.exs | cut -d: -f1)"
+
           if [ "$base_version" = "$head_version" ]; then
-            echo "::error file=mix.exs::lib/ changed but the version is still $head_version. Update it."
+            echo "::error file=mix.exs,line=$version_line::lib/ changed but the version is still $head_version. Update it."
             exit 1
           fi
 
           newest="$(printf '%s\n%s\n' "$base_version" "$head_version" | sort -V | tail -1)"
 
           if [ "$newest" != "$head_version" ]; then
-            echo "::error file=mix.exs::Version went backwards: $base_version -> $head_version."
+            echo "::error file=mix.exs,line=$version_line::Version went backwards: $base_version -> $head_version."
             exit 1
           fi
 
