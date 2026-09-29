@@ -22,6 +22,8 @@ defmodule MvOpentelemetry do
   ```
   """
 
+  @version Mix.Project.config()[:version]
+
   defmodule Error do
     defexception [:message, :module]
   end
@@ -129,5 +131,6 @@ defmodule MvOpentelemetry do
   def register_tracer(:plug, opts), do: __MODULE__.Plug.register_tracer(opts)
   def register_tracer(:tesla, opts), do: __MODULE__.Tesla.register_tracer(opts)
 
-  def version, do: "3.6.0"
+  @spec version() :: String.t()
+  def version, do: @version
 end
