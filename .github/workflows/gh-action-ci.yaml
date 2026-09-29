@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Erlang/OTP with Elixir and mix
         uses: erlef/setup-beam@v1
@@ -100,7 +100,7 @@ jobs:
 
     steps:
       - name: Checkout the pull request head
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
