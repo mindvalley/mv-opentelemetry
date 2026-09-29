@@ -86,7 +86,7 @@ defmodule MvOpentelemetry.PlugTest do
   test "handles timeout" do
     url = "http://localhost:4002/timeout"
 
-    {:error, %Mint.TransportError{reason: :timeout}} =
+    {:error, %Finch.TransportError{reason: :timeout}} =
       Finch.build(:get, url, [{"user-agent", "Plug Test"}, {"referer", "http://localhost"}])
       |> Finch.request(__MODULE__, receive_timeout: 100)
 
