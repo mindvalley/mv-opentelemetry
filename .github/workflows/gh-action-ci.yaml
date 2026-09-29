@@ -88,3 +88,57 @@ jobs:
           link_missing_lines: true
           only_changed_files: true
           link_missing_lines_source_dir: lib
+
+  version-update:
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: read
+
+    runs-on: ubuntu-latest
+    name: Library version updated when lib/ changes
+
+    steps:
+      - name: Checkout the pull request head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Fetch the base branch
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
+
+      - name: Require a mix.exs version update for changes in lib/
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+
+          merge_base="$(git merge-base "origin/$BASE_REF" HEAD)"
+
+          if git diff --quiet "$merge_base" HEAD -- lib/; then
+            echo "No changes in lib/, version update not required."
+            exit 0
+          fi
+
+          read_version() { sed -n 's/^ *version: "\(.*\)",$/\1/p' | head -1; }
+
+          base_version="$(git show "$merge_base:mix.exs" | read_version)"
+          head_version="$(read_version < mix.exs)"
+
+          if [ "$base_version" = "$head_version" ]; then
+            echo "::error file=mix.exs::lib/ changed but the version is still $head_version. Update it."
+            exit 1
+          fi
+
+          newest="$(printf '%s\n%s\n' "$base_version" "$head_version" | sort -V | tail -1)"
+
+          if [ "$newest" != "$head_version" ]; then
+            echo "::error file=mix.exs::Version went backwards: $base_version -> $head_version."
+            exit 1
+          fi
+
+          echo "Version updated: $base_version -> $head_version"
