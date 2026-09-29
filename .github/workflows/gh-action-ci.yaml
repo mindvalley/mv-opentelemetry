@@ -22,7 +22,7 @@ jobs:
       pull-requests: write
       checks: write
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Test on OTP ${{ matrix.otp }} / Elixir ${{ matrix.elixir }}
     strategy:
       # Specify the OTP and Elixir versions to use when building
@@ -95,7 +95,7 @@ jobs:
     permissions:
       contents: read
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Library version updated when lib/ changes
 
     steps:
