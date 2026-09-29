@@ -77,7 +77,9 @@ defmodule MvOpentelemetry.Finch do
     OpentelemetryTelemetry.end_telemetry_span(opts[:tracer_id], meta)
   end
 
-  defp get_status({:ok, response}), do: response.status
+  # Req 0.7 and above
+  defp get_status({:ok, {_request, {status, _headers, _body, _trailers}}}), do: status
+  defp get_status({:ok, %{status: status}}), do: status
   defp get_status(_), do: nil
 
   defp get_error({:error, %{__exception__: true} = exception}), do: Exception.message(exception)
@@ -87,6 +89,10 @@ defmodule MvOpentelemetry.Finch do
   def get_content_length(result) do
     case result do
       {:ok, %{headers: headers}} ->
+        :otel_http.extract_headers_attributes(:response, headers, ["content-length"])
+
+      # Req 0.7 and above
+      {:ok, {_request, {_status, headers, _body, _trailers}}} ->
         :otel_http.extract_headers_attributes(:response, headers, ["content-length"])
 
       _ ->
